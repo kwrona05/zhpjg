@@ -19,7 +19,7 @@ const Home: Function = () => {
                 <div>Kontakt</div>
                 <div>FEN</div>
             </div>
-            <div className="photos-container"></div>
+            <PhotosPlayer />
             <div className="posts"></div>
             <div className="footer"></div>
         </div>
