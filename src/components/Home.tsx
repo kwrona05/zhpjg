@@ -1,28 +1,31 @@
-const Home: Function = () => {
+import HeaderBar from './HeaderBar';
+import '../App.css';
+import PhotosPlayer from "./PhotosPlayer.tsx";
+
+const Home = () => {
     return (
-        <div className="home-container">
-            <header className="home-header">
-                <img src="grgr" alt="Photo1" />
-                <h1>Ocalić od zapomnienia</h1>
-                <img  src="grgr" alt="Photo2" />
-                <img  src="grgr" alt="Photo3" />
+        <div className="flex flex-col items-center min-h-screen w-screen bg-[#78815E] text-gray-800">
+            <header className="flex flex-row justify-center items-center w-full py-6 px-4 gap-4 shadow-md">
+                <img src="grgr" alt="Photo1" className="w-16 h-16 object-cover rounded-full" />
+                <h1 className="text-3xl font-bold text-white">Ocalić od zapomnienia</h1>
+                <img src="grgr" alt="Photo2" className="w-16 h-16 object-cover rounded-full" />
+                <img src="grgr" alt="Photo3" className="w-16 h-16 object-cover rounded-full" />
             </header>
-            <div className="header-bar">
-                <div>Home</div>
-                <div>Komisja Historyczna</div>
-                <div>Panteon</div>
-                <div>Publikacje</div>
-                <div>Sztandary</div>
-                <div>Muzeum</div>
-                <div>Chorągiew</div>
-                <div>Hufiec</div>
-                <div>Kontakt</div>
-                <div>FEN</div>
+
+            <div className="w-full bg-[] py-4 px-4">
+                <HeaderBar />
             </div>
-            <PhotosPlayer />
-            <div className="posts"></div>
-            <div className="footer"></div>
+            <div>
+                <PhotosPlayer />
+            </div>
+            <div>
+
+            </div>
+            <footer className="mt-auto min-h-screen w-full text-center py-4 text-white text-sm bot-0">
+                &copy; {new Date().getFullYear()} Twoja Nazwa | Wszystkie prawa zastrzeżone
+            </footer>
         </div>
-    )
-}
-export default Home
+    );
+};
+
+export default Home;
