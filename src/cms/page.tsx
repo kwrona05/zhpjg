@@ -10,25 +10,32 @@ const AdminPage = () => {
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
 
-    const fetchPosts = async () => {
-        const res = await axios.get('http//localhost:4000/api/posts')
-        setPosts(res.data)
-    }
-
     useEffect(() => {
+        const fetchPosts = async () => {
+            try {
+                const res = await axios.get('http://localhost:4000/api/posts')
+                // Upewnij się, że to jest tablica!
+                console.log('Posty z backendu:', res.data)
+                setPosts(res.data)
+            } catch (err) {
+                console.error('Błąd przy pobieraniu postów:', err)
+            }
+        }
+
         fetchPosts()
     }, [])
 
+
     const handleLogin = async () => {
-        const res = await axios.get('http//localhost:4000/api/login', {username, password})
+        const res = await axios.post('http://localhost:4000/api/login', {username, password})
         setToken(res.data.token)
+        console.log(res.data.token)
     }
 
     const handleCreatePost = async () => {
-        await axios.post('http//localhost:4000/api/posts', {title, content}, {headers: {'Authorization': `Bearer ${token}`}})
+        await axios.post('http://localhost:4000/api/posts', {title, content}, {headers: {'Authorization': `Bearer ${token}`}})
         setTitle('')
         setContent('')
-        fetchPosts()
     }
 
     const handleUploadPost = async () => {
@@ -36,14 +43,14 @@ const AdminPage = () => {
             return
         }
         const formData = new FormData()
-        await axios.post('http//localhost:4000/api/upload', formData, {headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'multipart/form-data'}})
+        await axios.post('http://localhost:4000/api/upload', formData, {headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'multipart/form-data'}})
         alert('Uploaded')
     }
 
     return(
         <main>
             {!token ? (
-                <div>
+                <div className="">
                     <h1>Logowanie</h1>
                     <input placeholder="Nazwa uzytkownika" onChange={(e) => setUsername(e.target.value)} />
                     <input placeholder="Hasło" onChange={(e) => setPassword(e.target.value)} />
@@ -69,6 +76,7 @@ const AdminPage = () => {
                                 <li key={post.id}>
                                     <strong>{post.title}</strong>
                                     <span>{post.content.slice(0, 100)}...</span>
+                                    <img src={`http://localhost:4000/uploads/${post.image}`} alt="Obraz"/>
                                 </li>
                             ))}
                         </ul>
