@@ -1,9 +1,11 @@
+require('dotenv').config()
 const express = require('express')
 const cors = require('cors')
 const multer = require('multer')
 const {PrismaClient} = require('@prisma/client')
 const bodyParser = require('body-parser')
 const jwt = require('jsonwebtoken')
+const path = require('path')
 
 const app = express()
 const prisma = new PrismaClient()
@@ -14,12 +16,13 @@ app.use(cors())
 app.use(bodyParser.json())
 
 const storage = multer.diskStorage({
-    destination: 'uploads/',
+    destination: function (req, file, cb) {
+        cb(null, path.join(__dirname, 'uploads'));},
     filename: (req, file, callback) => callback(null, Date.now() + '-' + file.originalname)
 })
 const upload = multer({storage})
 
-app.post('api/login', async (req, res) => {
+app.post('/api/login', async (req, res) => {
     const {username, password} = req.body
     if(username === 'andrzej' && password === '2023'){
         const token = jwt.sign({username}, SECRET, {expiresIn: '1h'})
@@ -36,20 +39,40 @@ const authenticate = (req, res, next) => {
     }
     const token = authHeader.split(' ')[1]
     try {
-        const user = jwt.verify(token, SECRET)
-        req.user = user
+        const username = jwt.verify(token, SECRET)
+        req.user = username
         next()
     } catch (err) {
         res.sendStatus(403)
     }
 }
 
-app.get('api.posts', async (req, res) => {
+app.get('/api/posts', async (req, res) => {
     const posts = await prisma.post.findMany()
     res.json(posts)
+    console.log(process.env.DATABASE_URL)
 })
 
-app.post('api/upload', authenticate, upload.single('image'), (req, res) => {
+app.get('/api/posts/:id', async (req, res) => {
+    const id = req.params
+    try {
+        const post = await prisma.post.findUnique({where: {id: Number(id)}})
+        if(!post) {
+            return res.status(404).json({error: 'Post not found'})
+        }
+        res.json(post)
+    } catch (err) {
+        res.status(500).json({error: 'Server Error'})
+    }
+})
+
+app.post('/api/posts', authenticate, async (req, res) => {
+    const { title, content, image } = req.body;
+    const post = await prisma.post.create({ data: { title, content, image } });
+    res.json(post);
+});
+
+app.post('/api/upload', authenticate, upload.single('image'), (req, res) => {
     res.json({filename: req.file.filename})
 })
 
