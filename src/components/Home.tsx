@@ -4,18 +4,17 @@ import PhotosPlayer from "./PhotosPlayer.tsx";
 
 const Home = () => {
     return (
-        <div className="flex flex-col items-center min-h-screen w-screen bg-[#78815E] text-gray-800">
-            <header className="flex flex-row justify-center items-center w-full py-6 px-4 gap-4 shadow-md">
+        <div className="flex flex-col gap-5 items-center min-h-screen w-screen bg-[#78815E] text-gray-800">
+            <header className="flex flex-row justify-center items-center w-full py-6 px-4 gap-4">
                 <img src="grgr" alt="Photo1" className="w-16 h-16 object-cover rounded-full" />
-                <h1 className="text-3xl font-bold text-white">Ocalić od zapomnienia</h1>
+                <h1 className="text-3xl font-bold text-[#3E452A]">Ocalić od zapomnienia</h1>
                 <img src="grgr" alt="Photo2" className="w-16 h-16 object-cover rounded-full" />
                 <img src="grgr" alt="Photo3" className="w-16 h-16 object-cover rounded-full" />
             </header>
-
-            <div className="w-full bg-[] py-4 px-4">
+            <div className="w-full py-4 px-4">
                 <HeaderBar />
             </div>
-            <div>
+            <div className="flex flex-col items-center w-full">
                 <PhotosPlayer />
             </div>
             <div>
