@@ -14,16 +14,15 @@ const Articles = () => {
     }, [])
 
     return(
-        <main>
+        <main className='w-full flex flex-col gap-2'>
             {posts.length === 0 ? (
-                <p>Brak wpisów</p>
+                <p className='text-[#D7D5BE]'>Brak wpisów</p>
             ) : (
                 posts.map((post) => (
-                    <article key={post.id}>
-                        <h2>{post.title}</h2>
-                        <p>{post.content}</p>
-                        <img src={`http://localhost:4000/uploads/${post.image}`} alt="Obraz"/>
-                        <button onClick={() => console.log(post.image)}>Click</button>
+                    <article key={post.id} className='w-[85%] bg-[#D7D5BE] rounded-2xl text-center'>
+                        <h2 className='font-sans text-[#3E452A] text-2xl font-bold'><strong>{post.title}</strong></h2>
+                        <p className='font-mono'>{post.content}</p>
+                        <img src={`http://localhost:4000/uploads/${post.image}`} alt="Obraz" className='scale-90 w-80% h-48' />
                     </article>
                 ))
             )}
