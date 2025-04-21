@@ -67,12 +67,12 @@ app.get('/api/posts/:id', async (req, res) => {
 })
 
 app.post('/api/posts', authenticate, upload.single('image'), async (req, res) => {
-    const { title, content } = req.body;
+    const { title, content, category } = req.body;
     const image = req.file ? req.file.filename : null;
 
     try {
         const post = await prisma.post.create({
-            data: { title, content, image }
+            data: { title, content, category, image }
         });
 
         res.json(post);
@@ -89,6 +89,19 @@ app.post('/api/uploads', authenticate, upload.single('image'), (req, res) => {
         return res.status(400).json({error: 'Post not found'})
     }
     res.json({filename: req.file.filename})
+})
+
+app.delete('/api/posts/:id', authenticate, async (req, res) => {
+    const postId = parseInt(req.params.id)
+
+    try {
+        await prisma.post.delete({where: {id: postId}})
+
+        res.status(200).json({message: 'Post usunięty'})
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({error: 'Wystąpił błąd serwera podczas usuwania'})
+    }
 })
 
 app.listen(port, () => {console.log(`Listening on http://localhost:${port}`)})
