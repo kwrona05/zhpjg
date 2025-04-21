@@ -33,18 +33,68 @@ const AdminPage = () => {
     }
 
     const handleCreatePost = async () => {
-        await axios.post('http://localhost:4000/api/posts', {title, content}, {headers: {'Authorization': `Bearer ${token}`}})
-        setTitle('')
-        setContent('')
+        if (!file) {
+            alert("Wybierz plik!");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('content', content);
+        formData.append('image', file);
+
+        try {
+            await axios.post('http://localhost:4000/api/posts', formData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            setTitle('');
+            setContent('');
+            setFile('');
+            alert('Post dodany!');
+        } catch (err) {
+            console.error('Błąd przy dodawaniu posta:', err);
+        }
     }
 
     const handleUploadPost = async () => {
         if(!file) {
+            alert('Wybierz plik')
             return
         }
         const formData = new FormData()
-        await axios.post('http://localhost:4000/api/upload', formData, {headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'multipart/form-data'}})
-        alert('Uploaded')
+        formData.append('image', file)
+
+        try {
+            const uploadResponse = await axios.post('http://localhost:4000/api/uploads',formData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'multipart/form-data',
+                }
+            })
+
+            const filename = uploadResponse.data.filename
+            alert('Zdjęcie wysłane!')
+
+            const postResponse = await axios.post('http://localhost:4000/api/posts', {
+                title, content, image: filename
+            }, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                }
+            })
+
+            console.log('Nowy post: ', postResponse.data)
+
+            setTitle('')
+            setContent('')
+            setFile(null)
+        } catch (error) {
+        console.error('Błąd przy wczytywaniu: ', error)
+        alert('Nie udało się wykonać czynności')}
     }
 
     return(
@@ -72,7 +122,7 @@ const AdminPage = () => {
                     <div>
                         <h2>Wpisy:</h2>
                         <ul>
-                            {posts.map((post: any) => (
+                            {posts.map((post) => (
                                 <li key={post.id}>
                                     <strong>{post.title}</strong>
                                     <span>{post.content.slice(0, 100)}...</span>
