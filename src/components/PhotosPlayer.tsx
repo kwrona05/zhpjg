@@ -1,3 +1,5 @@
+
+
 const PhotosPlayer = () => {
     const photos = [
         { src: '/photo1.jpg', description: 'Seniorzy ZHP' },
