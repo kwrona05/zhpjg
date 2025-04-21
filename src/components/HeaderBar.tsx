@@ -4,7 +4,7 @@ const HeaderBar = () => {
     const navigate = useNavigate();
 
     return (
-        <div className="flex flex-row justify-center w-full h-16 shadow-md py-4 px-6 sticky top-0 z-50 bg-[#3E452A]">
+        <div className="font-mono flex flex-row justify-center w-full h-16 shadow-md py-4 px-6 sticky top-0 z-50 bg-[#3E452A]">
             <nav className="flex items-center justify-center gap-15 text-[#D7D5BE] font-medium text-base text-center bg-[#3E452A]">
                 <div
                     onClick={() => navigate("/")}
