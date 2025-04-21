@@ -10,7 +10,7 @@ const PhotosPlayer = () => {
     ];
 
     return (
-        <div className="w-[70%] bg-[#D7D5BE] rounded-2xl flex justify-center">
+        <div className="w-[85%] bg-[#D7D5BE] rounded-2xl flex justify-center">
             <div className="scale-90 flex flex-wrap gap-4 justify-center">
                 {photos.map((photo, index) => {
                     const isTopRow = index < 2;
@@ -23,7 +23,7 @@ const PhotosPlayer = () => {
                                 alt={photo.description}
                                 className="w-full object-cover h-48"
                             />
-                            <div className="absolute bottom-0 left-0 w-full bg-[#BCA97A] text-[#3E452A] text-center py-8 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
+                            <div className="font-mono absolute bottom-0 left-0 w-full bg-[#BCA97A] text-[#3E452A] text-center py-8 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
                                 {photo.description}
                             </div>
                         </div>
