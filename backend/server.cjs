@@ -66,13 +66,28 @@ app.get('/api/posts/:id', async (req, res) => {
     }
 })
 
-app.post('/api/posts', authenticate, async (req, res) => {
-    const { title, content, image } = req.body;
-    const post = await prisma.post.create({ data: { title, content, image } });
-    res.json(post);
+app.post('/api/posts', authenticate, upload.single('image'), async (req, res) => {
+    const { title, content } = req.body;
+    const image = req.file ? req.file.filename : null;
+
+    try {
+        const post = await prisma.post.create({
+            data: { title, content, image }
+        });
+
+        res.json(post);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Server error' });
+    }
 });
 
-app.post('/api/upload', authenticate, upload.single('image'), (req, res) => {
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+
+app.post('/api/uploads', authenticate, upload.single('image'), (req, res) => {
+    if(!req.file) {
+        return res.status(400).json({error: 'Post not found'})
+    }
     res.json({filename: req.file.filename})
 })
 
