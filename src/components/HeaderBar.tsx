@@ -11,31 +11,31 @@ const HeaderBar = () => {
                     className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
                     Home
                 </div>
-                <div className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
+                <div onClick={() => navigate('/komisja-historyczna')} className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
                     Komisja Historyczna
                 </div>
-                <div className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
+                <div onClick={() => navigate('/panteon')} className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
                     Panteon
                 </div>
-                <div className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
+                <div onClick={() => navigate('/publikacje')} className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
                     Publikacje
                 </div>
-                <div className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
+                <div onClick={() => navigate('/sztandary')} className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
                     Sztandary
                 </div>
-                <div className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
+                <div onClick={() => navigate('/muzeum')} className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
                     Muzeum
                 </div>
-                <div className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
+                <div onClick={() => navigate('/choragiew')} className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
                     Chorągiew
                 </div>
-                <div className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
+                <div onClick={() => navigate('/hufiec')} className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
                     Hufiec
                 </div>
-                <div className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
+                <div onClick={() => navigate('/kontakt')} className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
                     Kontakt
                 </div>
-                <div className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
+                <div onClick={() => navigate('/fen')} className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
                     FEN
                 </div>
             </nav>
