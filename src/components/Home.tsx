@@ -20,7 +20,7 @@ const Home = () => {
             <div className='flex flex-col items-center w-full '>
                 <Articles />
             </div>
-            <footer className="mt-auto min-h-screen w-full text-center py-4 text-white text-sm bot-0">
+            <footer className="mt-auto w-full text-center py-4 text-white text-sm">
                 &copy; {new Date().getFullYear()} Twoja Nazwa | Wszystkie prawa zastrzeżone
             </footer>
         </div>
