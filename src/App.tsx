@@ -4,7 +4,6 @@ import Articles from "./components/Articles.tsx";
 import AdminPage from "./cms/page.tsx";
 import HistoricComission from "./components/HistoricComission.tsx";
 import Panteon from "./components/Panteon";
-import Publications from "./components/Publications.tsx";
 import Banners from "./components/Banners.tsx";
 import Museum from "./components/Museum.tsx";
 import Flag from "./components/Flag.tsx";
@@ -21,7 +20,6 @@ const App = () => {
                 <Route path="/page" element={<AdminPage />} />
                 <Route path='/komisja-historyczna' element={<HistoricComission />} />
                 <Route path='/panteon' element={<Panteon />} />
-                <Route path='/publikacje' element={<Publications />} />
                 <Route path='/sztandary' element={<Banners />} />
                 <Route path='/muzeum' element={<Museum />} />
                 <Route path='/choragiew' element={<Flag />} />
