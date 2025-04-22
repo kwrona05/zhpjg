@@ -17,7 +17,7 @@ const HeaderBar = () => {
                 <div onClick={() => navigate('/panteon')} className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
                     Panteon
                 </div>
-                <div onClick={() => navigate('/publikacje')} className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
+                <div onClick={() => navigate('/posts')} className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
                     Publikacje
                 </div>
                 <div onClick={() => navigate('/sztandary')} className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition">
