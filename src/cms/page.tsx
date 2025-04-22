@@ -160,7 +160,6 @@ const AdminPage = () => {
                             <option value="">Wybierz kategorię</option>
                             <option value="Komisja Historyczna">Komisja Historyczna</option>
                             <option value="Panteon">Panteon</option>
-                            <option value="Publikacje">Publikacje</option>
                             <option value="Sztandary">Sztandary</option>
                             <option value="Muzeum">Muzeum</option>
                             <option value="Chorągiew">Chorągiew</option>
