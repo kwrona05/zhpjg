@@ -2,37 +2,52 @@ import { useEffect, useState } from "react";
 import axios from 'axios';
 
 const Contact = () => {
-    const [posts, setPosts] = useState([]);
+    const [messages, setMessages] = useState([]);
+    const [email, setEmail] = useState('');
+    const [userMessage, setUserMessage] = useState('');
+    const [submitted, setSubmitted] = useState(false);
 
-    const fetchPosts = async () => {
-        const res = await axios.get('http://localhost:4000/api/posts');
-        const filteredPosts = res.data.filter(post => post.category === 'Kontakt');
-        setPosts(filteredPosts);
+    const fetchMessages = async () => {
+        try {
+            const res = await axios.get('http://localhost:4000/api/messages');
+            setMessages(res.data);
+        } catch (err) {
+            console.error("Błąd przy pobieraniu wiadomości:", err);
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            await axios.post('http://localhost:4000/api/messages',
+                { email, message: userMessage },
+                { headers: { 'Content-Type': 'application/json' } }
+            );
+            setSubmitted(true);
+            setEmail('');
+            setUserMessage('');
+            fetchMessages(); // Odśwież listę wiadomości po wysłaniu
+        } catch (error) {
+            console.error("Błąd podczas wysyłania wiadomości:", error);
+        }
     };
 
     useEffect(() => {
-        fetchPosts();
+        fetchMessages();
     }, []);
 
     return (
-        <main className='w-full flex flex-col gap-2'>
-            {posts.length === 0 ? (
-                <p>Brak wpisów</p>
-            ) : (
-                posts.map((post) => (
-                    <article key={post.id} className='bg-[#D7D5BE] rounded-2xl p-4 text-center'>
-                        <h2 className='text-2xl font-bold text-[#3E452A]'>{post.title}</h2>
-                        <p className='mt-2'>{post.content}</p>
-                        {post.image && (
-                            <img
-                                src={`http://localhost:4000/uploads/${post.image}`}
-                                alt="obrazek posta"
-                                className='w-[80%] h-48 object-cover mx-auto mt-4 rounded-lg'
-                            />
-                        )}
-                    </article>
-                ))
-            )}
+        <main className='bg-[#78815E] min-h-screen w-screen flex flex-col items-center gap-4 p-4'>
+            <form onSubmit={handleSubmit} className='w-[40%] bg-[#EAE9E0] p-4 rounded-xl shadow-md flex flex-col gap-2'>
+                <h2>Masz ciekawe artefakty? Skontaktuj się z nami</h2>
+                <input type='email' placeholder='Twój email' value={email} onChange={(e) => setEmail(e.target.value)} required className='w-full p-2 mb-2 border rounded'/>
+                <textarea placeholder='Twoja wiadomość' value={userMessage} onChange={(e) => setUserMessage(e.target.value)} required className='w-full p-2 mb-2 border rounded' />
+                <button type='submit' className='bg-[#3E452A] text-white px-4 py-2 rounded hover:bg-[#2f351d]'>Wyślij</button>
+                {submitted && <p className="text-green-600 mt-2">Wiadomość została wysłana!</p>}
+            </form>
+            <footer className="text-white mt-auto">
+                &copy; {new Date().getFullYear()} Twoja Nazwa | Wszystkie prawa zastrzeżone
+            </footer>
         </main>
     );
 };

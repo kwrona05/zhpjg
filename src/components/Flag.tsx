@@ -15,19 +15,19 @@ const Flag = () => {
     }, []);
 
     return (
-        <main className='w-full flex flex-col gap-2'>
+        <main className='bg-[#78815E] w-screen h-screen flex flex-col gap-4'>
             {posts.length === 0 ? (
-                <p>Brak wpisów</p>
+                <p className='text-[#D7D5BE]'>Brak wpisów</p>
             ) : (
                 posts.map((post) => (
-                    <article key={post.id} className='bg-[#D7D5BE] rounded-2xl p-4 text-center'>
+                    <article key={post.id} className='bg-[#D7D5BE] w-[80%] rounded-2xl p-4 text-center'>
                         <h2 className='text-2xl font-bold text-[#3E452A]'>{post.title}</h2>
                         <p className='mt-2'>{post.content}</p>
                         {post.image && (
                             <img
                                 src={`http://localhost:4000/uploads/${post.image}`}
                                 alt="obrazek posta"
-                                className='w-[80%] h-48 object-cover mx-auto mt-4 rounded-lg'
+                                className='scale-90 h-48 object-cover mx-auto mt-4 rounded-lg'
                             />
                         )}
                     </article>
