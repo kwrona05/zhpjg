@@ -9,7 +9,7 @@ const Home = () => {
             <header className="flex flex-row justify-center items-center w-full py-6 px-4 gap-4">
                 <img src="/logo.png" alt="Photo1" className="w-16 h-16 object-cover rounded-full" />
                 <h1 className="font-sans text-3xl font-bold text-[#3E452A]">Ocalić od zapomnienia</h1>
-                <img src="" alt="Photo2" className="w-16 h-16 object-cover rounded-full" />
+                <img src="krzyz" alt="Photo2" className="w-16 h-16 object-cover rounded-full" />
             </header>
             <div className="w-full py-4 px-4">
                 <HeaderBar />
