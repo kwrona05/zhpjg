@@ -26,11 +26,9 @@ const Articles = () => {
     }
 
     return(
-        <main className='w-full flex flex-col gap-2'>
+        <main className='w-screen h-screen bg-[#78815E] flex flex-col gap-4'>
             {posts.length === 0 ? (
-                <div className='w-screen h-screen bg-[#78815E] flex justify-center'>
                     <p className='text-[#D7D5BE]'>Brak wpisów</p>
-                </div>
             ) : (
                 posts.map((post) => {
                     const isExpanded = expandedPost[post.id]
