@@ -11,7 +11,8 @@ const AdminPage = () => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [activeSection, setActiveSection] = useState("addPost");
-    const [messages, setMessages] = useState([]);
+    const [serviceMessages, setServiceMessages] = useState([]);
+    const [contactMessages, setContactMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
 
     useEffect(() => {
@@ -28,6 +29,39 @@ const AdminPage = () => {
 
         fetchPosts();
     }, [token]);
+
+    useEffect(() => {
+        if (!token || activeSection !== "contactMessages") return
+
+        const fetchMessages = async () => {
+            try {
+                const res = await axios.get("http://localhost:4000/api/messages", {
+                    headers: {Authorization: `Bearer ${token}`},
+                })
+
+                setContactMessages(res.data);
+            } catch (error) {
+                console.error("Wystąpił błąd podczas pobierania wiadomości kontaktowych")
+            }
+        }
+
+        fetchMessages();
+    }, [token, activeSection]);
+
+    const handleMessage = () => {
+        if(!newMessage.trim()) {return}
+
+        const newMsg = {
+            id: Date.now(),
+            content: newMessage.trim(),
+        }
+        setServiceMessages((prev) => [...prev, newMsg])
+        setNewMessage("");
+    }
+
+    const handleDeleteMessage = (id) => {
+        setServiceMessages((prev) => prev.filter((msg) => msg.id !== id));
+    }
 
     const handleLogin = async () => {
         const res = await axios.post("http://localhost:4000/api/login", { username, password });
@@ -111,12 +145,8 @@ const AdminPage = () => {
             content: newMessage.trim(),
         }
 
-        setMessages((prev) => [...prev, newMsg]);
+        setServiceMessages((prev) => [...prev, newMsg]);
         setNewMessage("");
-    }
-
-    const handleDeleteMessage = (id) => {
-        setMessages((prev) => prev.filter((msg) => msg.id !== id));
     }
 
     return (
@@ -132,6 +162,9 @@ const AdminPage = () => {
                 </button>
                 <button onClick={() => setActiveSection("messages")} className="w-[90%] bg-[#D7D5BE] hover:bg-[#BCA97A] text-[#3E452A] p-2 rounded">
                     🛠️ Wiadomości serwisowe
+                </button>
+                <button onClick={() => setActiveSection("contactMessages")} className="w-[90%] bg-[#D7D5BE] hover:bg-[#BCA97A] text-[#3E452A] p-2 rounded">
+                    Powiadomienia
                 </button>
             </aside>
 
@@ -227,18 +260,44 @@ const AdminPage = () => {
                             </button>
                         </div>
 
-                        {messages.length === 0 ? (
+                        {serviceMessages.length === 0 ? (
                             <p className="text-[#3E452A]">Brak wiadomości serwisowych</p>
                         ) : (
-                            <ul className="space-y-2 flex flex-col gap-4">
-                                {messages.map((message) => (
-                                    <li key={message.id} className="w-[130%] bg-white p-4 rounded shadow flex justify-between items-center">
+                            <ul className="w-full flex flex-col gap-4">
+                                {serviceMessages.map((message) => (
+                                    <li key={message.id} className="w-[80%] bg-white p-4 rounded shadow flex justify-between items-center text-wrap">
                                         <p className="text-[#3E452A]">{message.content}</p>
                                         <button
                                             onClick={() => handleDeleteMessage(message.id)}
                                             className="text-red-600 hover:text-red-800 font-bold"
                                         >
                                             🗑️
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                )}
+
+                {activeSection === "contactMessages" && (
+                    <div className="flex flex-col gap-4 text-center">
+                        <h2 className="text-2xl font-bold mb-4">Wiadomości kontaktowe</h2>
+
+                        {contactMessages.length === 0 ? (
+                            <p className="text-[#3E452A]">Brak wiadomości</p>
+                        ) : (
+                            <ul className="w-full flex flex-col gap-4">
+                                {contactMessages.map((msg) => (
+                                    <li key={msg.id} className="w-[80%] bg-white p-4 rounded shadow text-left">
+                                        <p><strong>Email:</strong> {msg.email}</p>
+                                        <p className="mt-2"><strong>Wiadomość:</strong> {msg.message}</p>
+                                        <p className="mt-1 text-sm text-gray-500">📅 {new Date(msg.createdAt).toLocaleString()}</p>
+                                        <button
+                                            onClick={() => alert('Funkcja usuwania wiadomości będzie dostępna wkrótce')}
+                                            className="text-red-600 hover:text-red-800 mt-2"
+                                        >
+                                            🗑️ Usuń
                                         </button>
                                     </li>
                                 ))}
