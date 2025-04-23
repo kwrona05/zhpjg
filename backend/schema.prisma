@@ -14,3 +14,10 @@ model Post {
   image     String?
   category String?
 }
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  email     String
+  message   String
+  createdAt DateTime @default(now())
+}
