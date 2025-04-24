@@ -14,6 +14,7 @@ const AdminPage = () => {
     const [serviceMessages, setServiceMessages] = useState([]);
     const [contactMessages, setContactMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
+    const [submittedMessage, setSubmittedMessage] = useState(false);
 
     useEffect(() => {
         if (!token) return;
@@ -48,16 +49,56 @@ const AdminPage = () => {
         fetchMessages();
     }, [token, activeSection]);
 
-    const handleMessage = () => {
-        if(!newMessage.trim()) {return}
+    useEffect(() => {
+        if(!token || activeSection !== "messages") return
 
-        const newMsg = {
-            id: Date.now(),
-            content: newMessage.trim(),
+        const fetchServiceMessages = async () => {
+            try {
+                const res = await axios.get('http://localhost:4000/api/serviceMessages', {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                setServiceMessages(res.data);
+            } catch (error) {
+                console.error(error)
+            }
         }
-        setServiceMessages((prev) => [...prev, newMsg])
-        setNewMessage("");
-    }
+        fetchServiceMessages();
+    }, [token, activeSection]);
+
+    const handleServiceMessage = async (e) => {
+        e.preventDefault();
+
+        if (!newMessage.trim()) return;
+
+        try {
+            await axios.post(
+                "http://localhost:4000/api/serviceMessages",
+                { text: newMessage.trim() }, // <- zgodnie z backendem
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json",
+                    },
+                }
+            );
+
+            setNewMessage(""); // wyczyść pole tekstowe
+            setSubmittedMessage(true);
+
+            // odświeżenie wiadomości z bazy danych
+            const res = await axios.get("http://localhost:4000/api/serviceMessages", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            setServiceMessages(res.data);
+        } catch (error) {
+            console.error("Błąd podczas zapisywania wiadomości:", error);
+        }
+    };
 
     const handleDeleteMessage = (id) => {
         setServiceMessages((prev) => prev.filter((msg) => msg.id !== id));
@@ -133,20 +174,6 @@ const AdminPage = () => {
                 </div>
             </main>
         );
-    }
-
-    const handleAddMessage = () => {
-        if (!newMessage.trim()) {
-            return
-        }
-
-        const newMsg = {
-            id: Date.now(),
-            content: newMessage.trim(),
-        }
-
-        setServiceMessages((prev) => [...prev, newMsg]);
-        setNewMessage("");
     }
 
     return (
@@ -245,7 +272,7 @@ const AdminPage = () => {
                     <div className="flex flex-col gap-4 text-center">
                         <h2 className="text-2xl font-bold font-sans mb-4">Wiadomości serwisowe</h2>
 
-                        <div className="flex gap-2 mb-4 p-4">
+                        <form onSubmit={handleServiceMessage} className="flex gap-2 mb-4 p-4">
             <textarea
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
@@ -253,12 +280,12 @@ const AdminPage = () => {
                 className="w-80 flex-1 p-2 rounded text-[#3E452A] bg-white"
             />
                             <button
-                                onClick={handleAddMessage}
+                                type='submit'
                                 className="w-30 bg-[#BCA97A] hover:bg-[#c5c3aa] text-[#3E452A] px-4 py-2 rounded shadow-md"
                             >
                                 ➕ Dodaj
                             </button>
-                        </div>
+                        </form>
 
                         {serviceMessages.length === 0 ? (
                             <p className="text-[#3E452A]">Brak wiadomości serwisowych</p>
@@ -266,7 +293,7 @@ const AdminPage = () => {
                             <ul className="w-full flex flex-col gap-4">
                                 {serviceMessages.map((message) => (
                                     <li key={message.id} className="w-[80%] bg-white p-4 rounded shadow flex justify-between items-center text-wrap">
-                                        <p className="text-[#3E452A]">{message.content}</p>
+                                        <p className="text-[#3E452A]">{message.text}</p>
                                         <button
                                             onClick={() => handleDeleteMessage(message.id)}
                                             className="text-red-600 hover:text-red-800 font-bold"
