@@ -120,13 +120,37 @@ app.get('/api/messages', async (req, res) => {
     try {
         console.log("Pobieram wiadomości...");
         const messages = await prisma.message.findMany();
-        console.log("Wiadomości:", messages);
         res.json(messages);
     } catch (err) {
         console.error("Błąd w /api/messages:", err);
         res.status(500).json({ error: 'Błąd serwera przy pobieraniu wiadomości' });
     }
 });
+
+app.post('/api/serviceMessages', async (req, res) => {
+    const {text} = req.body
+    try {
+        const newMessage = await prisma.serviceMessage.create({
+            data: {
+                text,
+            }
+        })
+        res.json(newMessage);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({error: "Wystąpił błąd serwera podczas dodawania wiadomości"})
+    }
+})
+
+app.get('/api/serviceMessages', async (req, res) => {
+    try {
+        const serviceMessages = await prisma.serviceMessage.findMany();
+        res.json(serviceMessages);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({error: "Wystąpił błąd podczas pobierania wiadomości serwisowych"})
+    }
+})
 
 app.post('/api/messages', async (req, res) => {
     const { email, message } = req.body;
