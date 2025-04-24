@@ -11,6 +11,7 @@ import Detachment from "./components/Detachment.tsx";
 import Contact from "./components/Contact.tsx";
 import FEN from "./components/FEN.tsx";
 import Messages from "./components/Messages.tsx";
+import ServiceMessages from "./components/ServiceMessages.tsx";
 
 const App = () => {
     return(
@@ -28,6 +29,7 @@ const App = () => {
                 <Route path='/kontakt' element={<Contact />} />
                 <Route path='/fen' element={<FEN />} />
                 <Route path='/messages' element={<Messages />} />
+                <Route path='/serviceMessages' element={<ServiceMessages />} />
             </Routes>
         </Router>
     )
