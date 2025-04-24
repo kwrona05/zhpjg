@@ -21,3 +21,9 @@ model Message {
   message   String
   createdAt DateTime @default(now())
 }
+
+model ServiceMessage {
+  id        Int       @id @default(autoincrement())
+  text      String
+  createdAt DateTime  @default(now())
+}
