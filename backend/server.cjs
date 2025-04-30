@@ -24,7 +24,6 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-// Logowanie
 app.post("/api/login", async (req, res) => {
   const { username, password } = req.body;
   if (username === "andrzej" && password === "2023") {
@@ -35,7 +34,6 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// Middleware do autoryzacji
 const authenticate = (req, res, next) => {
   const authHeader = req.headers.authorization;
   if (!authHeader) {
@@ -51,7 +49,6 @@ const authenticate = (req, res, next) => {
   }
 };
 
-// Pobieranie postów
 app.get("/api/posts", async (req, res) => {
   try {
     const posts = await prisma.post.findMany();
@@ -62,7 +59,6 @@ app.get("/api/posts", async (req, res) => {
   }
 });
 
-// Pobieranie konkretnego posta
 app.get("/api/posts/:id", async (req, res) => {
   const id = req.params.id;
   try {
@@ -77,7 +73,6 @@ app.get("/api/posts/:id", async (req, res) => {
   }
 });
 
-// Dodawanie posta
 app.post(
   "/api/posts",
   authenticate,
@@ -98,7 +93,6 @@ app.post(
   }
 );
 
-// Usuwanie posta
 app.delete("/api/posts/:id", authenticate, async (req, res) => {
   const postId = parseInt(req.params.id);
 
@@ -139,7 +133,6 @@ app.delete("/api/messages/:id", authenticate, async (req, res) => {
   }
 });
 
-// Obsługa uploadów
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.post("/api/uploads", authenticate, upload.single("image"), (req, res) => {
