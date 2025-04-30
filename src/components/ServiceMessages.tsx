@@ -1,8 +1,8 @@
 const ServiceMessages = () => {
-    return(
-        <div>
-            <p>Coś</p>
-        </div>
-    )
-}
+  return (
+    <div>
+      <p>Coś</p>
+    </div>
+  );
+};
 export default ServiceMessages;
