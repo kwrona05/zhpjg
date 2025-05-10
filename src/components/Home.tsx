@@ -16,7 +16,7 @@ const Home = () => {
           Ocalić od zapomnienia
         </h1>
         <img
-          src="krzyz"
+          src="./krzyz.png"
           alt="Krzyz harcerski"
           className="w-16 h-16 object-cover rounded-full"
         />
@@ -31,7 +31,7 @@ const Home = () => {
         <Articles />
       </div>
       <footer className="mt-auto w-full text-center py-4 text-white text-sm">
-        &copy; {new Date().getFullYear()} Tech4You | Wszystkie prawa zastrzeżone
+        &copy; {new Date().getFullYear()} AIMEXA | Wszystkie prawa zastrzeżone
       </footer>
     </div>
   );

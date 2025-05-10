@@ -39,7 +39,7 @@ const Museum = () => {
         ))
       )}
       <footer className="text-white mt-auto">
-        &copy; {new Date().getFullYear()} Tech4You | Wszystkie prawa zastrzeżone
+        &copy; {new Date().getFullYear()} AIMEXA | Wszystkie prawa zastrzeżone
       </footer>
     </main>
   );
