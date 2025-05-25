@@ -105,6 +105,48 @@ app.delete("/api/posts/:id", authenticate, async (req, res) => {
   }
 });
 
+// app.put("/api/posts/:id", async (req, res) => {
+//   const { id } = req.params;
+//   const { title, content } = req.body;
+
+//   try {
+//     const updatePost = await prisma.post.update({
+//       where: { id: parseInt(id) },
+//       data: {
+//         title,
+//         content,
+//       },
+//     });
+
+//     res.json(updatedPost);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: "Post not found" });
+//   }
+// });
+
+app.put("/api/posts/:id", upload.single("image"), async (req, res) => {
+  const { title, content, category } = req.body;
+  const id = parseInt(req.params.id);
+
+  try {
+    const updatedPost = await prisma.post.update({
+      where: { id },
+      data: {
+        title,
+        content,
+        category,
+        image: req.file ? req.file.filename : undefined, // opcjonalnie
+      },
+    });
+
+    res.json(updatedPost);
+  } catch (error) {
+    console.error("Błąd aktualizacji posta:", error);
+    res.status(500).json({ error: "Nie udało się zaktualizować posta" });
+  }
+});
+
 app.delete("/api/serviceMessages/:id", authenticate, async (req, res) => {
   const serviceMessageId = parseInt(req.params.id);
 
