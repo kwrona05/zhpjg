@@ -147,6 +147,23 @@ app.put("/api/posts/:id", upload.single("image"), async (req, res) => {
   }
 });
 
+app.get("/api/posts", async (req, res) => {
+  const search = req.query.search || "";
+  try {
+    const posts = await prisma.post.findMany({
+      where: {
+        OR: [
+          { title: { contains: search, mode: "insensitive" } },
+          { content: { contains: search, mode: "insensitive" } },
+        ],
+      },
+    });
+    res.json(posts);
+  } catch (err) {
+    res.status(500).json({ error: "Wystąpił błąd serwera" });
+  }
+});
+
 app.delete("/api/serviceMessages/:id", authenticate, async (req, res) => {
   const serviceMessageId = parseInt(req.params.id);
 
