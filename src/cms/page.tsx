@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import UpdatePost from "./UpdatePost";
 
 const AdminPage = () => {
   const [token, setToken] = useState("");
@@ -15,6 +16,7 @@ const AdminPage = () => {
   const [contactMessages, setContactMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [submittedMessage, setSubmittedMessage] = useState(false);
+  const [editingPost, setEditingPost] = useState(null);
 
   useEffect(() => {
     if (!token) return;
@@ -309,9 +311,28 @@ const AdminPage = () => {
                   >
                     Usuń
                   </button>
+                  <button
+                    onClick={() => setEditingPost(post)}
+                    className="ml-2 bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded transition duration-300"
+                  >
+                    Edytuj
+                  </button>
                 </li>
               ))}
             </ul>
+            {editingPost && (
+              <UpdatePost
+                post={editingPost}
+                token={token}
+                onClose={() => setEditingPost(null)}
+                onUpdated={(updatedPost) => {
+                  setPosts((prev) =>
+                    prev.map((p) => (p.id === updatedPost.id ? updatedPost : p))
+                  );
+                  setEditingPost(null);
+                }}
+              />
+            )}
           </div>
         )}
 
