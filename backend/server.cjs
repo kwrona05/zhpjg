@@ -257,6 +257,36 @@ app.post("/api/messages", async (req, res) => {
   }
 });
 
+app.get("/api/photos", async (req, res) => {
+  try {
+    const photos = await prisma.photo.findMany({
+      orderBy: { id: "asc" },
+    });
+    res.json(photos);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Błąd serwera" });
+  }
+});
+
+app.post("/api/photos", upload.single("photo"), async (req, res) => {
+  try {
+    const description = req.body.description;
+    const fileUrl = "/uploads/" + req.file.filename;
+
+    const newPhoto = await prisma.photo.create({
+      data: {
+        url: fileUrl,
+        description,
+      },
+    });
+    res.status(201).json(newPhoto);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Błąd podczas dodawania zdjęcia" });
+  }
+});
+
 app.listen(port, () => {
   console.log(`Serwer działa na http://localhost:${port}`);
 });
