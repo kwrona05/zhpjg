@@ -11,55 +11,56 @@ const Home = () => {
   const [searchResults, setSearchResults] = useState([]);
 
   return (
-    <div className="relative flex flex-col gap-5 items-center min-h-screen w-screen bg-[#78815E] text-gray-800">
-      {/* HEADER */}
-      <header className="flex flex-row justify-center items-center w-full gap-2">
-        <img
-          src="/logo.png"
-          alt="Photo1"
-          className="w-16 h-16 object-cover rounded-full"
-        />
-        <h1 className="font-sans text-3xl font-bold text-[#3E452A]">
-          Ocalić od zapomnienia
-        </h1>
-        <img
-          src="./krzyz.png"
-          alt="Krzyz harcerski"
-          className="w-16 h-16 object-cover rounded-full"
-        />
-      </header>
+    <div className="flex flex-col min-h-screen w-screen bg-[#78815E] text-gray-800">
+      <div className="flex flex-col flex-grow gap-5 items-center">
+        {/* HEADER */}
+        <header className="flex flex-row justify-center items-center w-full gap-2">
+          <img
+            src="/logo.png"
+            alt="Photo1"
+            className="w-16 h-16 object-cover rounded-full"
+          />
+          <h1 className="font-sans text-3xl font-bold text-[#3E452A]">
+            Ocalić od zapomnienia
+          </h1>
+          <img
+            src="./krzyz.png"
+            alt="Krzyz harcerski"
+            className="w-16 h-16 object-cover rounded-full"
+          />
+        </header>
 
-      {/* HEADERBAR */}
-      <div className="w-full py-4 px-4">
-        <HeaderBar />
-      </div>
-
-      {/* SEARCH */}
-      {showSearch && (
-        <div className="w-full px-4">
-          <SearchPost onResults={setSearchResults} />
+        {/* HEADERBAR */}
+        <div className="w-full py-4 px-4">
+          <HeaderBar />
         </div>
-      )}
 
-      {/* SEARCH RESULTS */}
-      {searchResults.length > 0 && <SearchResults results={searchResults} />}
-
-      {/* DEFAULT CONTENT */}
-      {searchResults.length === 0 && (
-        <>
-          <div className="flex flex-col items-center w-full">
-            <PhotosPlayer />
+        {/* SEARCH */}
+        {showSearch && (
+          <div className="w-full px-4">
+            <SearchPost onResults={setSearchResults} />
           </div>
-          <div className="flex flex-col items-center w-full">
-            <Articles />
-          </div>
-        </>
-      )}
+        )}
 
-      {/* FOOTER */}
-      <footer className="mt-auto w-full text-center py-4 text-white text-sm">
+        {/* SEARCH RESULTS */}
+        {searchResults.length > 0 && <SearchResults results={searchResults} />}
+
+        {/* DEFAULT CONTENT */}
+        {searchResults.length === 0 && (
+          <>
+            <div className="flex flex-col items-center w-full">
+              <PhotosPlayer />
+            </div>
+            <div className="flex flex-col items-center w-full">
+              <Articles />
+            </div>
+          </>
+        )}
+      </div>
+      {/* FOOTER
+      <footer className="w-full text-center text-white text-sm">
         &copy; {new Date().getFullYear()} AIMEXA | Wszystkie prawa zastrzeżone
-      </footer>
+      </footer> */}
 
       {/* BUTTON */}
       <button
