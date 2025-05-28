@@ -1,91 +1,98 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import axios from "axios";
 
 const PhotosPlayer = () => {
-  const photos = [
-    { src: "/photo1.jpg", description: "Seniorzy ZHP" },
-    { src: "/photo4.jpg", description: "Historia w odznakach" },
-    { src: "/photo3.jpg", description: "ZHP dawniej" },
-    { src: "/photo2.jpg", description: "Harcerze i nowy sztandar" },
-    { src: "/photo5.jpg", description: "Legenda ZHP" },
-    { src: "/photo6.jpg", description: "Nowy rok 2025" },
-    { src: "/photo7.jpg", description: "ZHP dawniej" },
-    { src: "/photo8.jpg", description: "Młode lata ZHP" },
-    { src: "/photo9.jpg", description: "Młode lata ZHP" },
-    { src: "/photo10.jpg", description: "Spotkanie komendantów" },
-  ];
-
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  const photosPerPage = 5;
+  const [photos, setPhotos] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
+  const photosPerPage = 3;
 
-  const startIndex = currentPage * photosPerPage;
-  const currentPhotos = photos.slice(startIndex, startIndex + photosPerPage);
+  useEffect(() => {
+    const fetchPhotos = async () => {
+      try {
+        const res = await axios.get("http://localhost:4000/api/photos");
+        setPhotos(res.data);
+      } catch (error) {
+        console.error("Błąd przy pobieraniu zdjęć:", error);
+      }
+    };
+    fetchPhotos();
+  }, []);
 
   const totalPages = Math.ceil(photos.length / photosPerPage);
 
   const handlePrev = () => {
-    if (currentPage > 0) {
-      setIsAnimating(true);
-      setTimeout(() => {
-        setCurrentPage(currentPage - 1);
-        setIsAnimating(false);
-      }, 300);
-    }
+    setCurrentPage((prev) => Math.max(prev - 1, 0));
   };
 
   const handleNext = () => {
-    if (currentPage < totalPages - 1) {
-      setIsAnimating(true);
-      setTimeout(() => {
-        setCurrentPage(currentPage + 1);
-        setIsAnimating(false);
-      }, 300);
-    }
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1));
   };
 
+  const visiblePhotos = photos.slice(
+    currentPage * photosPerPage,
+    currentPage * photosPerPage + photosPerPage
+  );
+
   return (
-    <div className="w-[85%] bg-[#D7D5BE] rounded-2xl flex justify-center">
+    <div className="relative w-[85%] h-60  bg-[#D7D5BE] rounded-2xl flex items-center">
+      {/* Strzałka lewa */}
       <button
         onClick={handlePrev}
         disabled={currentPage === 0}
-        className="px-4 py-2 bg-[#BCA97A] text-[#3E452A] rounded-l-2xl disabled:opacity-50"
+        className="absolute left-0 z-10 h-full px-4 text-[#3E452A] bg-[#BCA97A] disabled:opacity-40 rounded-l-2xl flex items-center justify-center hover:bg-[#A99956] transition-colors"
       >
-        <ChevronLeft />
+        <ChevronLeft size={28} />
       </button>
-      <div
-        className={`scale-90 flex flex-wrap gap-4 justify-center transition-opacity duration-300 ${
-          isAnimating ? "opacity-0" : "opacity-100"
-        }`}
-      >
-        {currentPhotos.map((photo, index) => {
-          const isTopRow = index < 2;
-          const widthClass = isTopRow ? "w-[48%]" : "[w-33%]";
 
-          return (
+      {/* Kontener zdjęć */}
+      <div className="flex overflow-hidden w-full px-16 py-6">
+        <div
+          className="flex transition-transform duration-300 ease-in-out"
+          style={{
+            transform: `translateX(-${currentPage * 100}%)`,
+            width: `${totalPages * 100}%`,
+          }}
+        >
+          {photos.length === 0 && (
+            <div className="text-center w-full">Brak zdjęć do wyświetlenia</div>
+          )}
+
+          {photos.map((photo) => (
             <div
-              key={index}
-              className={`${widthClass} relative overflow-hidden rounded-2xl shadow-md group m-10`}
+              key={photo.id}
+              className="flex-shrink-0 w-1/3 px-2 flex flex-col items-center relative"
+              style={{ maxHeight: "280px" }}
             >
-              <img
-                src={photo.src}
-                alt={photo.description}
-                className="w-full object-cover h-48"
-              />
-              <div className="font-mono absolute bottom-0 left-0 w-full bg-[#BCA97A] text-[#3E452A] text-center py-8 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                {photo.description}
+              <div className="scale-90 h-48 rounded-lg relative group">
+                <img
+                  src={`http://localhost:4000${photo.url}`}
+                  alt={photo.description}
+                  className="max-h-full max-w-full object-contain rounded-xl"
+                />
+                <div
+                  className="absolute bottom-0 left-0 w-full bg-[#BCA97A] text-[#3E452A] text-center
+      py-2 font-mono
+      opacity-0 translate-y-full
+      group-hover:opacity-100 group-hover:translate-y-0
+      transition-all duration-300 ease-in-out
+      rounded-b-xl"
+                >
+                  {photo.description}
+                </div>
               </div>
             </div>
-          );
-        })}
+          ))}
+        </div>
       </div>
+
+      {/* Strzałka prawa */}
       <button
         onClick={handleNext}
-        disabled={currentPage === totalPages - 1}
-        className="px-4 py-2 bg-[#BCA97A] text-[#3E452A] rounded-r-2xl disabled:opacity-50"
+        disabled={currentPage === totalPages - 1 || totalPages === 0}
+        className="absolute right-0 z-10 h-full px-4 text-[#3E452A] bg-[#BCA97A] disabled:opacity-40 rounded-r-2xl flex items-center justify-center hover:bg-[#A99956] transition-colors"
       >
-        <ChevronRight />
+        <ChevronRight size={28} />
       </button>
     </div>
   );

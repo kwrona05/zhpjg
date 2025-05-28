@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import UpdatePost from "./UpdatePost";
+import AdminAddPhoto from "./PhotoFile";
 
 const AdminPage = () => {
   const [token, setToken] = useState("");
@@ -240,6 +241,12 @@ const AdminPage = () => {
         >
           Powiadomienia
         </button>
+        <button
+          onClick={() => setActiveSection("gallery")}
+          className="w-[90%] bg-[#D7D5BE] hover:bg-[#BCA97A] text-[#3E452A] p-2 rounded"
+        >
+          Wyjątkowe zdjęcia
+        </button>
       </aside>
 
       {/* Main Content */}
@@ -417,6 +424,7 @@ const AdminPage = () => {
             )}
           </div>
         )}
+        {activeSection === "gallery" && <AdminAddPhoto />}
       </main>
     </div>
   );
