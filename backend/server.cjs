@@ -6,6 +6,12 @@ const { PrismaClient } = require("@prisma/client");
 const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
 const path = require("path");
+const { ScanCommand } = require("@aws-sdk/lib-dynamodb");
+const { docClient } = require("./lib/dynamoClient.cjs");
+const { GetCommand } = require("@aws-sdk/lib-dynamodb");
+const { PutCommand } = require("@aws-sdk/lib-dynamodb");
+const { v4: uuidv4 } = require("uuid");
+const { DeleteCommand } = require("@aws-sdk/lib-dynamodb");
 
 const app = express();
 const prisma = new PrismaClient();
@@ -51,8 +57,10 @@ const authenticate = (req, res, next) => {
 
 app.get("/api/posts", async (req, res) => {
   try {
-    const posts = await prisma.post.findMany();
-    res.json(posts);
+    const result = await docClient.send(
+      new ScanCommand({ TableName: "Posts" })
+    );
+    res.json(result.Items);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Błąd serwera przy pobieraniu postów" });
@@ -62,13 +70,14 @@ app.get("/api/posts", async (req, res) => {
 app.get("/api/posts/:id", async (req, res) => {
   const id = req.params.id;
   try {
-    const post = await prisma.post.findUnique({ where: { id: Number(id) } });
-    if (!post) {
+    const result = await docClient.send(
+      new GetCommand({ TableName: "Posts", Key: { id } })
+    );
+    if (!result.Item) {
       return res.status(404).json({ error: "Post nie znaleziony" });
     }
-    res.json(post);
+    res.json(result.Item);
   } catch (err) {
-    console.error(err);
     res.status(500).json({ error: "Błąd serwera" });
   }
 });
@@ -80,11 +89,17 @@ app.post(
   async (req, res) => {
     const { title, content, category } = req.body;
     const image = req.file ? req.file.filename : null;
+    const id = uuidv4();
 
     try {
-      const post = await prisma.post.create({
-        data: { title, content, category, image },
-      });
+      const post = {
+        id,
+        title,
+        content,
+        category,
+        image,
+      };
+      await docClient.send(new PutCommand({ TableName: "Posts", Item: post }));
       res.json(post);
     } catch (err) {
       console.error(err);
@@ -94,10 +109,12 @@ app.post(
 );
 
 app.delete("/api/posts/:id", authenticate, async (req, res) => {
-  const postId = parseInt(req.params.id);
+  const id = req.params.id;
 
   try {
-    await prisma.post.delete({ where: { id: postId } });
+    await docClient.send(
+      new DeleteCommand({ TableName: "Posts", Key: { id } })
+    );
     res.status(200).json({ message: "Post usunięty" });
   } catch (error) {
     console.error(error);
@@ -165,10 +182,12 @@ app.get("/api/posts", async (req, res) => {
 });
 
 app.delete("/api/serviceMessages/:id", authenticate, async (req, res) => {
-  const serviceMessageId = parseInt(req.params.id);
+  const id = req.params.id;
 
   try {
-    await prisma.serviceMessage.delete({ where: { id: serviceMessageId } });
+    await docClient.send(
+      new DeleteCommand({ TableName: "ServiceMessages", Key: { id } })
+    );
     res.status(200).json({ message: "Wiadomość serwisowa usunięta" });
   } catch (error) {
     console.error(error);
@@ -179,12 +198,12 @@ app.delete("/api/serviceMessages/:id", authenticate, async (req, res) => {
 });
 
 app.delete("/api/messages/:id", authenticate, async (req, res) => {
-  const messageId = parseInt(req.params.id);
+  const id = req.params.id;
 
   try {
-    await prisma.message.delete({
-      where: { id: messageId },
-    });
+    await docClient.send(
+      new DeleteCommand({ TableName: "Messages", Key: { id } })
+    );
     res.status(200).json({ message: "Wiadomość została usunięta." });
   } catch (error) {
     console.error("Błąd przy usuwaniu wiadomości:", error);
@@ -203,36 +222,39 @@ app.post("/api/uploads", authenticate, upload.single("image"), (req, res) => {
 
 app.get("/api/messages", async (req, res) => {
   try {
-    console.log("Pobieram wiadomości...");
-    const messages = await prisma.message.findMany();
-    res.json(messages);
+    const result = await docClient.send(
+      new ScanCommand({ TableName: "Messages" })
+    );
+    res.json(result.Items);
   } catch (err) {
     console.error("Błąd w /api/messages:", err);
     res.status(500).json({ error: "Błąd serwera przy pobieraniu wiadomości" });
   }
 });
-
 app.post("/api/serviceMessages", async (req, res) => {
   const { text } = req.body;
+  const id = uuidv4();
+
   try {
-    const newMessage = await prisma.serviceMessage.create({
-      data: {
-        text,
-      },
-    });
+    const newMessage = { id, text };
+    await docClient.send(
+      new PutCommand({ TableName: "ServiceMessages", Item: newMessage })
+    );
     res.json(newMessage);
   } catch (error) {
     console.error(error);
-    res
-      .status(500)
-      .json({ error: "Wystąpił błąd serwera podczas dodawania wiadomości" });
+    res.status(500).json({
+      error: "Wystąpił błąd serwera podczas dodawania wiadomości",
+    });
   }
 });
 
 app.get("/api/serviceMessages", async (req, res) => {
   try {
-    const serviceMessages = await prisma.serviceMessage.findMany();
-    res.json(serviceMessages);
+    const result = await docClient.send(
+      new ScanCommand({ TableName: "ServiceMessages" })
+    );
+    res.json(result.Items);
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -243,13 +265,13 @@ app.get("/api/serviceMessages", async (req, res) => {
 
 app.post("/api/messages", async (req, res) => {
   const { email, message } = req.body;
+  const id = uuidv4();
+
   try {
-    const newMessage = await prisma.message.create({
-      data: {
-        email,
-        message,
-      },
-    });
+    const newMessage = { id, email, message };
+    await docClient.send(
+      new PutCommand({ TableName: "Messages", Item: newMessage })
+    );
     res.json(newMessage);
   } catch (err) {
     console.error(err);
@@ -259,10 +281,10 @@ app.post("/api/messages", async (req, res) => {
 
 app.get("/api/photos", async (req, res) => {
   try {
-    const photos = await prisma.photo.findMany({
-      orderBy: { id: "asc" },
-    });
-    res.json(photos);
+    const result = await docClient.send(
+      new ScanCommand({ TableName: "Photos" })
+    );
+    res.json(result.Items);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Błąd serwera" });
@@ -270,16 +292,19 @@ app.get("/api/photos", async (req, res) => {
 });
 
 app.post("/api/photos", upload.single("photo"), async (req, res) => {
-  try {
-    const description = req.body.description;
-    const fileUrl = "/uploads/" + req.file.filename;
+  const { description } = req.body;
+  const fileUrl = "/uploads/" + req.file.filename;
+  const id = uuidv4();
 
-    const newPhoto = await prisma.photo.create({
-      data: {
-        url: fileUrl,
-        description,
-      },
-    });
+  try {
+    const newPhoto = {
+      id,
+      url: fileUrl,
+      description,
+    };
+    await docClient.send(
+      new PutCommand({ TableName: "Photos", Item: newPhoto })
+    );
     res.status(201).json(newPhoto);
   } catch (error) {
     console.error(error);
