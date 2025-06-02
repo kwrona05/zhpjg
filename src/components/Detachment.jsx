@@ -2,14 +2,15 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import HeaderBar from "./HeaderBar";
 
-const HistoricComission = () => {
+const Detachment = () => {
   const [posts, setPosts] = useState([]);
 
+  const API_URL =
+    "https://hib2xshxpi7aict3l2hqlbqcx40bmwnh.lambda-url.us-east-1.on.aws";
+
   const fetchPosts = async () => {
-    const res = await axios.get("http://localhost:4000/api/posts");
-    const filteredPosts = res.data.filter(
-      (post) => post.category === "Komisja Historyczna"
-    );
+    const res = await axios.get(`${API_URL}/api/posts`);
+    const filteredPosts = res.data.filter((post) => post.category === "Hufiec");
     setPosts(filteredPosts);
   };
 
@@ -47,4 +48,4 @@ const HistoricComission = () => {
   );
 };
 
-export default HistoricComission;
+export default Detachment;

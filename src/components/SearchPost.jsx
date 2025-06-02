@@ -3,9 +3,12 @@ import { useState } from "react";
 const SearchPost = ({ onResults }) => {
   const [query, setQuery] = useState("");
 
+  const API_URL =
+    "https://hib2xshxpi7aict3l2hqlbqcx40bmwnh.lambda-url.us-east-1.on.aws";
+
   const searchPosts = async () => {
     const res = await fetch(
-      `http://localhost:4000/api/posts?search=${encodeURIComponent(query)}`
+      `${API_URL}/api/posts?search=${encodeURIComponent(query)}`
     );
     if (!res.ok) {
       const text = await res.text();

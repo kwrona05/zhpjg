@@ -7,10 +7,13 @@ const PhotosPlayer = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const photosPerPage = 3;
 
+  const API_URL =
+    "https://hib2xshxpi7aict3l2hqlbqcx40bmwnh.lambda-url.us-east-1.on.aws";
+
   useEffect(() => {
     const fetchPhotos = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/photos");
+        const res = await axios.get(`${API_URL}/api/photos`);
         setPhotos(res.data);
       } catch (error) {
         console.error("Błąd przy pobieraniu zdjęć:", error);

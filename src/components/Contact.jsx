@@ -8,9 +8,12 @@ const Contact = () => {
   const [userMessage, setUserMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
+  const API_URL =
+    "https://hib2xshxpi7aict3l2hqlbqcx40bmwnh.lambda-url.us-east-1.on.aws";
+
   const fetchMessages = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/messages");
+      const res = await axios.get(`${API_URL}/api/messages`);
       setMessages(res.data);
     } catch (err) {
       console.error("Błąd przy pobieraniu wiadomości:", err);
@@ -21,7 +24,7 @@ const Contact = () => {
     e.preventDefault();
     try {
       await axios.post(
-        "http://localhost:4000/api/messages",
+        `${API_URL}/api/messages`,
         { email, message: userMessage },
         { headers: { "Content-Type": "application/json" } }
       );

@@ -1,10 +1,10 @@
 import { useState } from "react";
-import HeaderBar from "./HeaderBar";
+import HeaderBar from "./HeaderBar.jsx";
 import "../App.css";
-import PhotosPlayer from "./PhotosPlayer.tsx";
-import Articles from "./Articles";
-import SearchPost from "./SearchPost";
-import SearchResults from "./SearchResults";
+import PhotosPlayer from "./PhotosPlayer.jsx";
+import Articles from "./Articles.jsx";
+import SearchPost from "./SearchPost.jsx";
+import SearchResults from "./SearchResults.jsx";
 
 const Home = () => {
   const [showSearch, setShowSearch] = useState(false);

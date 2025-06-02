@@ -19,12 +19,15 @@ const AdminPage = () => {
   const [submittedMessage, setSubmittedMessage] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
 
+  const API_URL =
+    "https://hib2xshxpi7aict3l2hqlbqcx40bmwnh.lambda-url.us-east-1.on.aws";
+
   useEffect(() => {
     if (!token) return;
 
     const fetchPosts = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/posts");
+        const res = await axios.get(`${API_URL}/api/posts`);
         setPosts(res.data);
       } catch (err) {
         console.error("Błąd przy pobieraniu postów:", err);
@@ -39,7 +42,7 @@ const AdminPage = () => {
 
     const fetchMessages = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/messages", {
+        const res = await axios.get(`${API_URL}/api/messages`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -59,14 +62,11 @@ const AdminPage = () => {
 
     const fetchServiceMessages = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:4000/api/serviceMessages",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const res = await axios.get(`${API_URL}/api/serviceMessages`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         setServiceMessages(res.data);
       } catch (error) {
         console.error(error);
@@ -82,7 +82,7 @@ const AdminPage = () => {
 
     try {
       await axios.post(
-        "http://localhost:4000/api/serviceMessages",
+        `${API_URL}/api/serviceMessages`,
         { text: newMessage.trim() }, // <- zgodnie z backendem
         {
           headers: {
@@ -96,7 +96,7 @@ const AdminPage = () => {
       setSubmittedMessage(true);
 
       // odświeżenie wiadomości z bazy danych
-      const res = await axios.get("http://localhost:4000/api/serviceMessages", {
+      const res = await axios.get(`${API_URL}/api/serviceMessages`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -113,7 +113,7 @@ const AdminPage = () => {
       return;
 
     try {
-      await axios.delete(`http://localhost:4000/api/serviceMessages/${id}`, {
+      await axios.delete(`${API_URL}/api/serviceMessages/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setServiceMessages((prev) => prev.filter((msg) => msg.id !== id));
@@ -127,7 +127,7 @@ const AdminPage = () => {
     if (!window.confirm("Czy na pewno chcesz usunąć wiadomość?")) return;
 
     try {
-      await axios.delete(`http://localhost:4000/api/messages/${id}`, {
+      await axios.delete(`${API_URL}/api/messages/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setContactMessages((prev) => prev.filter((msg) => msg.id !== id));
@@ -138,7 +138,7 @@ const AdminPage = () => {
   };
 
   const handleLogin = async () => {
-    const res = await axios.post("http://localhost:4000/api/login", {
+    const res = await axios.post(`${API_URL}/api/login`, {
       username,
       password,
     });
@@ -155,7 +155,7 @@ const AdminPage = () => {
     formData.append("image", file);
 
     try {
-      await axios.post("http://localhost:4000/api/posts", formData, {
+      await axios.post(`${API_URL}/api/posts`, formData, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data",

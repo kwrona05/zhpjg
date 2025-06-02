@@ -2,14 +2,15 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import HeaderBar from "./HeaderBar";
 
-const Flag = () => {
+const Museum = () => {
   const [posts, setPosts] = useState([]);
 
+  const API_URL =
+    "https://hib2xshxpi7aict3l2hqlbqcx40bmwnh.lambda-url.us-east-1.on.aws";
+
   const fetchPosts = async () => {
-    const res = await axios.get("http://localhost:4000/api/posts");
-    const filteredPosts = res.data.filter(
-      (post) => post.category === "Chorągiew"
-    );
+    const res = await axios.get(`${API_URL}/api/posts`);
+    const filteredPosts = res.data.filter((post) => post.category === "Muzeum");
     setPosts(filteredPosts);
   };
 
@@ -32,7 +33,7 @@ const Flag = () => {
             <p className="mt-2">{post.content}</p>
             {post.image && (
               <img
-                src={`http://localhost:4000/uploads/${post.image}`}
+                src={`${API_URL}/uploads/${post.image}`}
                 alt="obrazek posta"
                 className="scale-90 h-48 object-cover mx-auto mt-4 rounded-lg"
               />
@@ -47,4 +48,4 @@ const Flag = () => {
   );
 };
 
-export default Flag;
+export default Museum;

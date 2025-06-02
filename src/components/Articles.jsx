@@ -5,8 +5,11 @@ const Articles = () => {
   const [posts, setPosts] = useState([]);
   const [expandedPost, setExpandedPost] = useState({});
 
+  const API_URL =
+    "https://hib2xshxpi7aict3l2hqlbqcx40bmwnh.lambda-url.us-east-1.on.aws";
+
   const fetchPosts = async () => {
-    const res = await axios.get("http://localhost:4000/api/posts");
+    const res = await axios.get(`${API_URL}/api/posts`);
     setPosts(res.data);
   };
 
