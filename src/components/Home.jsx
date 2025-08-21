@@ -5,10 +5,12 @@ import PhotosPlayer from "./PhotosPlayer.jsx";
 import Articles from "./Articles.jsx";
 import SearchPost from "./SearchPost.jsx";
 import SearchResults from "./SearchResults.jsx";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
+  const navigate = useNavigate();
 
   return (
     <div className="flex flex-col min-h-screen w-screen bg-[#78815E] text-gray-800">
@@ -64,13 +66,10 @@ const Home = () => {
 
       {/* BUTTON */}
       <button
-        onClick={() => {
-          setShowSearch((prev) => !prev);
-          setSearchResults([]); // wyczyść wyniki po zamknięciu
-        }}
+        onClick={() => navigate("/page")}
         className="fixed bottom-6 right-6 bg-[#3E452A] text-white px-5 py-3 rounded-full shadow-lg hover:bg-[#2e331f] transition"
       >
-        {showSearch ? "Zamknij" : "🔍 Szukaj postów"}
+        Admin
       </button>
     </div>
   );

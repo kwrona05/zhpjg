@@ -12,6 +12,7 @@ import Contact from "./components/Contact.jsx";
 import FEN from "./components/FEN.jsx";
 import Messages from "./components/Messages.jsx";
 import ServiceMessages from "./components/ServiceMessages.jsx";
+import Photos from "./components/photos.jsx";
 
 const App = () => {
   return (
@@ -30,6 +31,7 @@ const App = () => {
         <Route path="/fen" element={<FEN />} />
         <Route path="/messages" element={<Messages />} />
         <Route path="/serviceMessages" element={<ServiceMessages />} />
+        <Route path="/photos" element={<Photos />} />
       </Routes>
     </Router>
   );

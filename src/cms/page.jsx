@@ -138,7 +138,7 @@ const AdminPage = () => {
   };
 
   const handleLogin = async () => {
-    const res = await axios.post(`${API_URL}/api/login`, {
+    const res = await axios.post(`${API_URL}/login`, {
       username,
       password,
     });
@@ -152,7 +152,14 @@ const AdminPage = () => {
     formData.append("title", title);
     formData.append("content", content);
     formData.append("category", category);
-    formData.append("image", file);
+    if (file) {
+      formData.append("image", file);
+
+      await fetch("/upload", {
+        method: "POST",
+        body: formData,
+      });
+    }
 
     try {
       await axios.post(`${API_URL}/api/posts`, formData, {
@@ -307,7 +314,7 @@ const AdminPage = () => {
                   </p>
                   {post.image && (
                     <img
-                      src={`http://localhost:4000/uploads/${post.image}`}
+                      src={post.image}
                       alt="Post image"
                       className="scale-90 h-60 mt-2 rounded"
                     />

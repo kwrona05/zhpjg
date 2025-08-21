@@ -35,7 +35,7 @@ const Banners = () => {
             <p className="mt-2">{post.content}</p>
             {post.image && (
               <img
-                src={`http://localhost:4000/uploads/${post.image}`}
+                src={post.image}
                 alt="obrazek posta"
                 className="scale-90 h-48 object-cover mx-auto mt-4 rounded-lg"
               />

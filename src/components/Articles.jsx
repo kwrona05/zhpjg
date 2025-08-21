@@ -49,7 +49,7 @@ const Articles = () => {
                 {isExpanded ? post.content : truncateText(post.content, 200)}
               </p>
               <img
-                src={`http://localhost:4000/uploads/${post.image}`}
+                src={post.imageUrl}
                 alt="Obraz"
                 className="scale-90 h-48 rounded-lg"
               />

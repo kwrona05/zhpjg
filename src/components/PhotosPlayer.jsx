@@ -69,7 +69,7 @@ const PhotosPlayer = () => {
             >
               <div className="scale-90 h-48 rounded-lg relative group">
                 <img
-                  src={`http://localhost:4000${photo.url}`}
+                  src={photo.url}
                   alt={photo.description}
                   className="max-h-full max-w-full object-contain rounded-xl"
                 />
