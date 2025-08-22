@@ -1,223 +1,103 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState } from "react";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  serverTimestamp,
+} from "firebase/firestore";
+import { db } from "../../firebase";
+import useFirestoreCollection from "../../useFirestoreCollection";
 import UpdatePost from "./UpdatePost";
 import AdminAddPhoto from "./PhotoFile";
 
 const AdminPage = () => {
-  const [token, setToken] = useState("");
-  const [posts, setPosts] = useState([]);
+  // sekcje i formularze
+  const [activeSection, setActiveSection] = useState("addPost");
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [content, setContent] = useState("");
-  const [file, setFile] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [activeSection, setActiveSection] = useState("addPost");
-  const [serviceMessages, setServiceMessages] = useState([]);
-  const [contactMessages, setContactMessages] = useState([]);
+  const [file, setFile] = useState(null);
   const [newMessage, setNewMessage] = useState("");
-  const [submittedMessage, setSubmittedMessage] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
 
-  const API_URL =
-    "https://hib2xshxpi7aict3l2hqlbqcx40bmwnh.lambda-url.us-east-1.on.aws";
+  // realtime z Firestore
+  const posts = useFirestoreCollection("posts");
+  const serviceMessages = useFirestoreCollection("serviceMessages");
+  const contactMessages = useFirestoreCollection("messages");
 
-  useEffect(() => {
-    if (!token) return;
-
-    const fetchPosts = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/api/posts`);
-        setPosts(res.data);
-      } catch (err) {
-        console.error("Błąd przy pobieraniu postów:", err);
-      }
-    };
-
-    fetchPosts();
-  }, [token]);
-
-  useEffect(() => {
-    if (!token || activeSection !== "contactMessages") return;
-
-    const fetchMessages = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/api/messages`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        setContactMessages(res.data);
-      } catch (error) {
-        console.error(
-          "Wystąpił błąd podczas pobierania wiadomości kontaktowych"
-        );
-      }
-    };
-
-    fetchMessages();
-  }, [token, activeSection]);
-
-  useEffect(() => {
-    if (!token || activeSection !== "messages") return;
-
-    const fetchServiceMessages = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/api/serviceMessages`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setServiceMessages(res.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchServiceMessages();
-  }, [token, activeSection]);
-
-  const handleServiceMessage = async (e) => {
-    e.preventDefault();
-
-    if (!newMessage.trim()) return;
-
-    try {
-      await axios.post(
-        `${API_URL}/api/serviceMessages`,
-        { text: newMessage.trim() }, // <- zgodnie z backendem
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      setNewMessage(""); // wyczyść pole tekstowe
-      setSubmittedMessage(true);
-
-      // odświeżenie wiadomości z bazy danych
-      const res = await axios.get(`${API_URL}/api/serviceMessages`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setServiceMessages(res.data);
-    } catch (error) {
-      console.error("Błąd podczas zapisywania wiadomości:", error);
-    }
-  };
-
-  const handleDeleteServiceMessage = async (id) => {
-    if (!window.confirm("Czy na pewno chcesz usunąć wiadomość serwisową?"))
-      return;
-
-    try {
-      await axios.delete(`${API_URL}/api/serviceMessages/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setServiceMessages((prev) => prev.filter((msg) => msg.id !== id));
-    } catch (error) {
-      console.error("Błąd podczas usuwania wiadomości serwisowej:", error);
-      alert("Nie udało się usunąć wiadomości");
-    }
-  };
-
-  const handleDeleteMessage = async (id) => {
-    if (!window.confirm("Czy na pewno chcesz usunąć wiadomość?")) return;
-
-    try {
-      await axios.delete(`${API_URL}/api/messages/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setContactMessages((prev) => prev.filter((msg) => msg.id !== id));
-    } catch (error) {
-      console.error("Nastąpił błąd podczas usuwania wiadomości:", error);
-      alert("Nie udało się usunąć wiadomości");
-    }
-  };
-
-  const handleLogin = async () => {
-    const res = await axios.post(`${API_URL}/login`, {
-      username,
-      password,
-    });
-    setToken(res.data.token);
-  };
-
+  // 📌 Dodawanie posta
   const handleCreatePost = async () => {
-    if (!file) return alert("Wybierz plik!");
-
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("content", content);
-    formData.append("category", category);
-    if (file) {
-      formData.append("image", file);
-
-      await fetch("/upload", {
-        method: "POST",
-        body: formData,
-      });
-    }
+    if (!title || !content) return alert("Uzupełnij tytuł i treść!");
 
     try {
-      await axios.post(`${API_URL}/api/posts`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
+      await addDoc(collection(db, "posts"), {
+        title,
+        content,
+        category,
+        image: null, // obrazek ustawisz w UpdatePost
+        createdAt: serverTimestamp(),
       });
 
       setTitle("");
       setContent("");
-      setFile("");
+      setCategory("");
+      setFile(null);
       alert("Post dodany!");
     } catch (err) {
       console.error("Błąd przy dodawaniu posta:", err);
     }
   };
 
+  // 📌 Usuwanie posta
   const handleDeletePost = async (postId) => {
     if (!window.confirm("Czy na pewno chcesz usunąć wpis?")) return;
 
     try {
-      await axios.delete(`http://localhost:4000/api/posts/${postId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setPosts((prev) => prev.filter((post) => post.id !== postId));
+      await deleteDoc(doc(db, "posts", postId));
     } catch (error) {
-      console.error(error);
-      alert("Wystąpił błąd podczas usuwania posta");
+      console.error("Błąd podczas usuwania posta:", error);
     }
   };
 
-  if (!token) {
-    return (
-      <main className="w-screen h-screen bg-[#3E452A] flex justify-center items-center">
-        <div className="w-[40%] h-[40%] bg-[#CAD2C5] flex flex-col gap-6 p-6 rounded-2xl items-center">
-          <h1 className="text-xl font-semibold">Logowanie</h1>
-          <input
-            placeholder="Nazwa użytkownika"
-            onChange={(e) => setUsername(e.target.value)}
-            className="w-[60%] text-center bg-white rounded-2xl py-2"
-          />
-          <input
-            type="password"
-            placeholder="Hasło"
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-[60%] text-center bg-white rounded-2xl py-2"
-          />
-          <button
-            onClick={handleLogin}
-            className="w-[60%] bg-[#D7D5BE] hover:bg-[#BCA97A] text-black font-semibold py-2 px-4 rounded-2xl shadow-md transition duration-300"
-          >
-            Zaloguj się
-          </button>
-        </div>
-      </main>
-    );
-  }
+  // 📌 Dodanie wiadomości serwisowej
+  const handleServiceMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+
+    try {
+      await addDoc(collection(db, "serviceMessages"), {
+        text: newMessage.trim(),
+        createdAt: serverTimestamp(),
+      });
+      setNewMessage("");
+    } catch (error) {
+      console.error("Błąd podczas zapisywania wiadomości:", error);
+    }
+  };
+
+  // 📌 Usuwanie wiadomości serwisowej
+  const handleDeleteServiceMessage = async (id) => {
+    if (!window.confirm("Czy na pewno chcesz usunąć wiadomość serwisową?"))
+      return;
+
+    try {
+      await deleteDoc(doc(db, "serviceMessages", id));
+    } catch (error) {
+      console.error("Błąd podczas usuwania wiadomości serwisowej:", error);
+    }
+  };
+
+  // 📌 Usuwanie wiadomości kontaktowej
+  const handleDeleteMessage = async (id) => {
+    if (!window.confirm("Czy na pewno chcesz usunąć wiadomość?")) return;
+
+    try {
+      await deleteDoc(doc(db, "messages", id));
+    } catch (error) {
+      console.error("Błąd podczas usuwania wiadomości:", error);
+    }
+  };
 
   return (
     <div className="w-screen flex h-screen">
@@ -258,6 +138,7 @@ const AdminPage = () => {
 
       {/* Main Content */}
       <main className="flex-1 bg-[#CAD2C5] p-6 overflow-y-auto">
+        {/* Dodaj wpis */}
         {activeSection === "addPost" && (
           <div className="max-w-xl space-y-4 flex flex-col gap-4">
             <h2 className="text-2xl font-bold">Dodaj nowy wpis</h2>
@@ -288,11 +169,6 @@ const AdminPage = () => {
               <option value="Kontakt">Kontakt</option>
               <option value="FEN">FEN</option>
             </select>
-            <input
-              type="file"
-              onChange={(e) => setFile(e.target.files[0])}
-              className="w-full p-2 text-[#3E452A] bg-white rounded"
-            />
             <button
               onClick={handleCreatePost}
               className="bg-[#BCA97A] w-[60%] hover:bg-[#c5c3aa] text-[#3E452A] font-bold py-2 px-6 rounded-xl shadow-md transition duration-300"
@@ -302,6 +178,7 @@ const AdminPage = () => {
           </div>
         )}
 
+        {/* Lista wpisów */}
         {activeSection === "posts" && (
           <div className="flex flex-col gap-4">
             <h2 className="text-2xl font-bold mb-4">Lista wpisów</h2>
@@ -315,7 +192,7 @@ const AdminPage = () => {
                   {post.image && (
                     <img
                       src={post.image}
-                      alt="Post image"
+                      alt="Post"
                       className="scale-90 h-60 mt-2 rounded"
                     />
                   )}
@@ -337,12 +214,8 @@ const AdminPage = () => {
             {editingPost && (
               <UpdatePost
                 post={editingPost}
-                token={token}
                 onClose={() => setEditingPost(null)}
                 onUpdated={(updatedPost) => {
-                  setPosts((prev) =>
-                    prev.map((p) => (p.id === updatedPost.id ? updatedPost : p))
-                  );
                   setEditingPost(null);
                 }}
               />
@@ -350,12 +223,12 @@ const AdminPage = () => {
           </div>
         )}
 
+        {/* Wiadomości serwisowe */}
         {activeSection === "messages" && (
           <div className="flex flex-col gap-4 text-center">
             <h2 className="text-2xl font-bold font-sans mb-4">
               Wiadomości serwisowe
             </h2>
-
             <form
               onSubmit={handleServiceMessage}
               className="flex gap-2 mb-4 p-4"
@@ -373,19 +246,18 @@ const AdminPage = () => {
                 ➕ Dodaj
               </button>
             </form>
-
             {serviceMessages.length === 0 ? (
               <p className="text-[#3E452A]">Brak wiadomości serwisowych</p>
             ) : (
               <ul className="w-full flex flex-col gap-4">
-                {serviceMessages.map((message) => (
+                {serviceMessages.map((msg) => (
                   <li
-                    key={message.id}
+                    key={msg.id}
                     className="w-[80%] bg-white p-4 rounded shadow flex justify-between items-center text-wrap"
                   >
-                    <p className="text-[#3E452A]">{message.text}</p>
+                    <p className="text-[#3E452A]">{msg.text}</p>
                     <button
-                      onClick={() => handleDeleteServiceMessage(message.id)}
+                      onClick={() => handleDeleteServiceMessage(msg.id)}
                       className="text-red-600 hover:text-red-800 font-bold"
                     >
                       🗑️
@@ -397,10 +269,10 @@ const AdminPage = () => {
           </div>
         )}
 
+        {/* Wiadomości kontaktowe */}
         {activeSection === "contactMessages" && (
           <div className="flex flex-col gap-4 text-center">
             <h2 className="text-2xl font-bold mb-4">Wiadomości kontaktowe</h2>
-
             {contactMessages.length === 0 ? (
               <p className="text-[#3E452A]">Brak wiadomości</p>
             ) : (
@@ -417,7 +289,7 @@ const AdminPage = () => {
                       <strong>Wiadomość:</strong> {msg.message}
                     </p>
                     <p className="mt-1 text-sm text-gray-500">
-                      📅 {new Date(msg.createdAt).toLocaleString()}
+                      📅 {msg.createdAt?.toDate().toLocaleString()}
                     </p>
                     <button
                       onClick={() => handleDeleteMessage(msg.id)}
@@ -431,6 +303,8 @@ const AdminPage = () => {
             )}
           </div>
         )}
+
+        {/* Galeria */}
         {activeSection === "gallery" && <AdminAddPhoto />}
       </main>
     </div>

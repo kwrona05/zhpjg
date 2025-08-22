@@ -1,35 +1,40 @@
 import { useState } from "react";
-import axios from "axios";
+import { doc, updateDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage } from "../../firebase";
 
-const UpdatePost = ({ post, token, onClose, onUpdated }) => {
+const UpdatePost = ({ post, onClose, onUpdated }) => {
   const [title, setTitle] = useState(post.title);
   const [content, setContent] = useState(post.content);
-  const [category, setCategory] = useState(post.category);
+  const [category, setCategory] = useState(post.category || "");
   const [file, setFile] = useState(null);
 
   const handleUpdate = async (e) => {
     e.preventDefault();
 
-    const formData = new FormData();
-    formData.append("title", title);
-    formData.append("content", content);
-    formData.append("category", category);
-    if (file) formData.append("image", file);
-
     try {
-      const res = await axios.put(
-        `http://localhost:4000/api/posts/${post.id}`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-      onUpdated(res.data);
+      let imageUrl = post.image;
+
+      // Jeśli wybrano nowy plik -> upload do Storage
+      if (file) {
+        const storageRef = ref(storage, `posts/${Date.now()}-${file.name}`);
+        await uploadBytes(storageRef, file);
+        imageUrl = await getDownloadURL(storageRef);
+      }
+
+      // aktualizacja Firestore
+      const postRef = doc(db, "posts", post.id);
+      await updateDoc(postRef, {
+        title,
+        content,
+        category,
+        image: imageUrl,
+      });
+
+      onUpdated({ ...post, title, content, category, image: imageUrl });
     } catch (err) {
       console.error("Błąd podczas aktualizacji posta:", err);
+      alert("Nie udało się zaktualizować posta");
     }
   };
 
