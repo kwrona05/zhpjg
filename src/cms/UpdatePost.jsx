@@ -7,19 +7,23 @@ const UpdatePost = ({ post, onClose, onUpdated }) => {
   const [title, setTitle] = useState(post.title);
   const [content, setContent] = useState(post.content);
   const [category, setCategory] = useState(post.category || "");
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
 
   const handleUpdate = async (e) => {
     e.preventDefault();
 
     try {
-      let imageUrl = post.image;
+      let imageUrls = post.images || [];
 
-      // Jeśli wybrano nowy plik -> upload do Storage
-      if (file) {
-        const storageRef = ref(storage, `posts/${Date.now()}-${file.name}`);
-        await uploadBytes(storageRef, file);
-        imageUrl = await getDownloadURL(storageRef);
+      if (files.length > 0) {
+        const newUrls = [];
+        for (const file of files) {
+          const storageRef = ref(storage, `posts/${Date.now()}-${file.name}`);
+          await uploadBytes(storageRef, file);
+          const url = await getDownloadURL(storageRef);
+          newUrls.push(url);
+        }
+        imageUrls = [...imageUrls, ...newUrls];
       }
 
       // aktualizacja Firestore
@@ -28,10 +32,11 @@ const UpdatePost = ({ post, onClose, onUpdated }) => {
         title,
         content,
         category,
-        image: imageUrl,
+        images: imageUrls,
       });
 
-      onUpdated({ ...post, title, content, category, image: imageUrl });
+      onUpdated({ ...post, title, content, category, images: imageUrls });
+      setFiles([]);
     } catch (err) {
       console.error("Błąd podczas aktualizacji posta:", err);
       alert("Nie udało się zaktualizować posta");
@@ -69,7 +74,28 @@ const UpdatePost = ({ post, onClose, onUpdated }) => {
           <option value="Kontakt">Kontakt</option>
           <option value="FEN">FEN</option>
         </select>
-        <input type="file" onChange={(e) => setFile(e.target.files[0])} />
+
+        {/* Upload nowych zdjęć */}
+        <input
+          type="file"
+          multiple
+          onChange={(e) => setFiles([...e.target.files])}
+        />
+
+        {/* Podgląd już dodanych zdjęć */}
+        {post.images && post.images.length > 0 && (
+          <div className="flex gap-2 flex-wrap mt-2">
+            {post.images.map((url, idx) => (
+              <img
+                key={idx}
+                src={url}
+                alt={`Post-${idx}`}
+                className="h-24 rounded object-cover"
+              />
+            ))}
+          </div>
+        )}
+
         <div className="flex gap-4">
           <button
             type="submit"
