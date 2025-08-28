@@ -6,12 +6,14 @@ import {
   deleteDoc,
   doc,
   serverTimestamp,
+  getDocs,
 } from "firebase/firestore";
 import { db, storage } from "../../firebase";
 import useFirestoreCollection from "../../useFirestoreCollection";
 import UpdatePost from "./UpdatePost";
 import AdminAddPhoto from "./PhotoFile";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import PhotosPlayer from "../components/PhotosPlayer";
 
 const AdminPage = () => {
   const [activeSection, setActiveSection] = useState("addPost");
@@ -21,6 +23,8 @@ const AdminPage = () => {
   const [files, setFiles] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [editingPost, setEditingPost] = useState(null);
+  const [playerFiles, setPlayerFiles] = useState([]);
+  const [playerImages, setPlayerImages] = useState([]);
 
   const posts = useFirestoreCollection("posts");
   const serviceMessages = useFirestoreCollection("serviceMessages");
@@ -30,10 +34,22 @@ const AdminPage = () => {
 
   useEffect(() => {
     const isAdmin = localStorage.getItem("isAdmin");
-    if (!isAdmin) {
-      navigate("/login");
-    }
+    if (!isAdmin) navigate("/login");
+    fetchPlayerImages();
   }, [navigate]);
+
+  const fetchPlayerImages = async () => {
+    try {
+      const snapshot = await getDocs(collection(db, "gallery")); // 👈 zamiast "playerPhotos"
+      const images = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setPlayerImages(images);
+    } catch (err) {
+      console.error("Błąd pobierania zdjęć:", err);
+    }
+  };
 
   const handleCreatePost = async () => {
     if (!title || !content) return alert("Uzupełnij tytuł i treść!");
@@ -118,6 +134,35 @@ const AdminPage = () => {
     }
   };
 
+  const handleAddPlayerPhotos = async () => {
+    if (playerFiles.length === 0) return;
+
+    try {
+      const urls = [];
+      for (const file of playerFiles) {
+        const storageRef = ref(storage, `player/${Date.now()}-${file.name}`);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        urls.push(url);
+      }
+
+      for (const url of urls) {
+        const docRef = await addDoc(collection(db, "gallery"), {
+          url,
+          createdAt: serverTimestamp(),
+        });
+        // od razu dodajemy do stanu lokalnego, żeby PhotosPlayer odświeżył się natychmiast
+        setPlayerImages((prev) => [...prev, { id: docRef.id, url }]);
+      }
+
+      setPlayerFiles([]);
+      alert("Zdjęcia dodane do Photo Playera!");
+    } catch (err) {
+      console.error(err);
+      alert("Błąd podczas dodawania zdjęć");
+    }
+  };
+
   return (
     <div className="w-screen flex h-screen">
       {/* Sidebar */}
@@ -153,6 +198,7 @@ const AdminPage = () => {
         >
           Wyjątkowe zdjęcia
         </button>
+        <button onClick={() => setActiveSection("photoPlayer")}>Galeria</button>
         <button
           onClick={() => {
             localStorage.removeItem("isAdmin");
@@ -211,7 +257,6 @@ const AdminPage = () => {
             </button>
           </div>
         )}
-
         {/* Lista wpisów */}
         {activeSection === "posts" && (
           <div className="flex flex-col gap-4">
@@ -261,7 +306,6 @@ const AdminPage = () => {
             )}
           </div>
         )}
-
         {/* Wiadomości serwisowe */}
         {activeSection === "messages" && (
           <div className="flex flex-col gap-4 text-center">
@@ -307,7 +351,6 @@ const AdminPage = () => {
             )}
           </div>
         )}
-
         {/* Wiadomości kontaktowe */}
         {activeSection === "contactMessages" && (
           <div className="flex flex-col gap-4 text-center">
@@ -342,9 +385,44 @@ const AdminPage = () => {
             )}
           </div>
         )}
+        {activeSection === "photoPlayer" && (
+          <div className="max-w-xl flex flex-col gap-4">
+            <h2 className="text-2xl font-bold">
+              Dodaj zdjęcia do Photo Playera
+            </h2>
 
-        {/* Galeria */}
-        {activeSection === "gallery" && <AdminAddPhoto />}
+            {/* formularz uploadu */}
+            <input
+              type="file"
+              multiple
+              onChange={(e) => setPlayerFiles([...e.target.files])}
+              className="w-full p-2 rounded bg-white"
+            />
+            <button
+              onClick={handleAddPlayerPhotos}
+              className="bg-[#BCA97A] w-[60%] hover:bg-[#c5c3aa] text-[#3E452A] font-bold py-2 px-6 rounded-xl shadow-md transition duration-300"
+            >
+              Dodaj zdjęcia
+            </button>
+
+            {/* Podgląd zdjęć */}
+            {playerFiles.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-4">
+                {playerFiles.map((file, idx) => (
+                  <img
+                    key={idx}
+                    src={URL.createObjectURL(file)}
+                    alt={`Podgląd ${idx}`}
+                    className="h-40 w-auto rounded shadow"
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* 👇 Photo Player */}
+            <PhotosPlayer photos={playerImages} />
+          </div>
+        )}
       </main>
     </div>
   );
