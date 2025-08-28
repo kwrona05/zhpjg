@@ -6,13 +6,13 @@ import {
   doc,
   serverTimestamp,
 } from "firebase/firestore";
-import { db } from "../../firebase";
+import { db, storage } from "../../firebase";
 import useFirestoreCollection from "../../useFirestoreCollection";
 import UpdatePost from "./UpdatePost";
 import AdminAddPhoto from "./PhotoFile";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const AdminPage = () => {
-  // sekcje i formularze
   const [activeSection, setActiveSection] = useState("addPost");
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
@@ -21,21 +21,29 @@ const AdminPage = () => {
   const [newMessage, setNewMessage] = useState("");
   const [editingPost, setEditingPost] = useState(null);
 
-  // realtime z Firestore
   const posts = useFirestoreCollection("posts");
   const serviceMessages = useFirestoreCollection("serviceMessages");
   const contactMessages = useFirestoreCollection("messages");
 
-  // 📌 Dodawanie posta
   const handleCreatePost = async () => {
     if (!title || !content) return alert("Uzupełnij tytuł i treść!");
 
     try {
+      let imageUrl = null;
+
+      // jeśli wybrano plik, wrzuć go do Storage
+      if (file) {
+        const storageRef = ref(storage, `posts/${Date.now()}-${file.name}`);
+        await uploadBytes(storageRef, file);
+        imageUrl = await getDownloadURL(storageRef);
+      }
+
+      // zapis dokumentu w Firestore
       await addDoc(collection(db, "posts"), {
         title,
         content,
         category,
-        image: null, // obrazek ustawisz w UpdatePost
+        image: imageUrl, // ✅ zapisujemy link do zdjęcia
         createdAt: serverTimestamp(),
       });
 
@@ -49,7 +57,6 @@ const AdminPage = () => {
     }
   };
 
-  // 📌 Usuwanie posta
   const handleDeletePost = async (postId) => {
     if (!window.confirm("Czy na pewno chcesz usunąć wpis?")) return;
 
@@ -60,7 +67,6 @@ const AdminPage = () => {
     }
   };
 
-  // 📌 Dodanie wiadomości serwisowej
   const handleServiceMessage = async (e) => {
     e.preventDefault();
     if (!newMessage.trim()) return;
@@ -76,7 +82,6 @@ const AdminPage = () => {
     }
   };
 
-  // 📌 Usuwanie wiadomości serwisowej
   const handleDeleteServiceMessage = async (id) => {
     if (!window.confirm("Czy na pewno chcesz usunąć wiadomość serwisową?"))
       return;
@@ -88,7 +93,6 @@ const AdminPage = () => {
     }
   };
 
-  // 📌 Usuwanie wiadomości kontaktowej
   const handleDeleteMessage = async (id) => {
     if (!window.confirm("Czy na pewno chcesz usunąć wiadomość?")) return;
 
@@ -154,6 +158,12 @@ const AdminPage = () => {
               placeholder="Treść"
               className="w-full p-2 h-32 rounded text-[#3E452A] bg-white"
             />
+            <input
+              type="file"
+              onChange={(e) => setFile(e.target.files[0])}
+              className="w-full p-2 rounded bg-white"
+            />
+
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
