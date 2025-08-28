@@ -1,25 +1,15 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import useFirestoreCollection from "../../useFirestoreCollection";
 
-const PhotosPlayer = () => {
+const PhotosPlayer = ({ photos = [] }) => {
   const [currentPage, setCurrentPage] = useState(0);
-  const photos = useFirestoreCollection("gallery", "createdAt", {
-    field: "featured",
-    op: "==",
-    value: true,
-  });
   const photosPerPage = 3;
 
   const totalPages = Math.ceil(photos.length / photosPerPage);
 
-  const handlePrev = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 0));
-  };
-
-  const handleNext = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages - 1));
-  };
+  const handlePrev = () => setCurrentPage((p) => Math.max(p - 1, 0));
+  const handleNext = () =>
+    setCurrentPage((p) => Math.min(p + 1, totalPages - 1));
 
   const visiblePhotos = photos.slice(
     currentPage * photosPerPage,
@@ -27,61 +17,47 @@ const PhotosPlayer = () => {
   );
 
   return (
-    <div className="relative w-[85%] h-60 bg-[#D7D5BE] rounded-2xl flex items-center mx-auto">
-      {/* Strzałka lewa */}
+    <div className="relative w-full h-60 bg-[#D7D5BE] rounded-2xl flex items-center mt-4">
+      {/* Left arrow */}
       <button
         onClick={handlePrev}
         disabled={currentPage === 0}
+        aria-label="Poprzednie zdjęcie"
         className="absolute left-0 z-10 h-full px-4 text-[#3E452A] bg-[#BCA97A] disabled:opacity-40 rounded-l-2xl flex items-center justify-center hover:bg-[#A99956] transition-colors"
       >
         <ChevronLeft size={28} />
       </button>
 
-      {/* Kontener zdjęć */}
-      <div className="flex overflow-hidden w-full px-16 py-6">
-        <div
-          className="flex transition-transform duration-300 ease-in-out"
-          style={{
-            transform: `translateX(-${currentPage * 100}%)`,
-            width: `${totalPages * 100}%`,
-          }}
-        >
-          {photos.length === 0 && (
-            <div className="text-center w-full">Brak zdjęć do wyświetlenia</div>
-          )}
-
-          {visiblePhotos.map((photo) => (
+      {/* Photos */}
+      <div className="flex w-full px-16 py-6 justify-center">
+        {visiblePhotos.length === 0 ? (
+          <div className="text-center w-full text-[#3E452A]">Brak zdjęć</div>
+        ) : (
+          visiblePhotos.map((photo) => (
             <div
               key={photo.id}
-              className="flex-shrink-0 w-1/3 px-2 flex flex-col items-center relative"
-              style={{ maxHeight: "280px" }}
+              className="flex-shrink-0 w-1/3 px-2 flex flex-col items-center"
             >
-              <div className="scale-90 h-48 rounded-lg relative group">
-                <img
-                  src={photo.url}
-                  alt={photo.caption}
-                  className="max-h-full max-w-full object-contain rounded-xl"
-                />
-                <div
-                  className="absolute bottom-0 left-0 w-full bg-[#BCA97A] text-[#3E452A] text-center
-      py-2 font-mono
-      opacity-0 translate-y-full
-      group-hover:opacity-100 group-hover:translate-y-0
-      transition-all duration-300 ease-in-out
-      rounded-b-xl"
-                >
+              <img
+                src={photo.url}
+                alt={photo.caption || `Zdjęcie ${photo.id}`}
+                className="h-48 w-auto rounded shadow"
+              />
+              {photo.caption && (
+                <div className="text-center mt-1 text-sm text-[#3E452A]">
                   {photo.caption}
                 </div>
-              </div>
+              )}
             </div>
-          ))}
-        </div>
+          ))
+        )}
       </div>
 
-      {/* Strzałka prawa */}
+      {/* Right arrow */}
       <button
         onClick={handleNext}
         disabled={currentPage === totalPages - 1 || totalPages === 0}
+        aria-label="Następne zdjęcie"
         className="absolute right-0 z-10 h-full px-4 text-[#3E452A] bg-[#BCA97A] disabled:opacity-40 rounded-r-2xl flex items-center justify-center hover:bg-[#A99956] transition-colors"
       >
         <ChevronRight size={28} />
