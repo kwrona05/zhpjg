@@ -1,58 +1,48 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState } from "react";
+import { collection, query, orderBy } from "firebase/firestore";
+import { db } from "../../firebase";
+import useFirestoreCollection from "../../useFirestoreCollection";
 
 const Articles = () => {
-  const [posts, setPosts] = useState([]);
   const [expandedPost, setExpandedPost] = useState({});
-
-  const API_URL =
-    "https://hib2xshxpi7aict3l2hqlbqcx40bmwnh.lambda-url.us-east-1.on.aws";
-
-  const fetchPosts = async () => {
-    const res = await axios.get(`${API_URL}/api/posts`);
-    setPosts(res.data);
-  };
-
-  useEffect(() => {
-    fetchPosts();
-  }, []);
+  const posts = useFirestoreCollection("posts", "createdAt"); // 🔥 Twój hook już ogarnia sortowanie
 
   const toggleExpand = (postId) => {
     setExpandedPost((prev) => ({ ...prev, [postId]: !prev[postId] }));
   };
 
   const truncateText = (text, limit) => {
-    if (text.length <= limit) {
-      return text;
-    }
-    return text.slice(0, limit) + "...";
+    if (!text) return "";
+    return text.length <= limit ? text : text.slice(0, limit) + "...";
   };
 
   return (
-    <main className="w-screen h-screen bg-[#78815E] flex flex-col gap-4">
+    <main className="w-screen min-h-screen bg-[#78815E] flex flex-col items-center gap-6 py-6">
       {posts.length === 0 ? (
         <p className="text-[#D7D5BE]">Brak wpisów</p>
       ) : (
         posts.map((post) => {
           const isExpanded = expandedPost[post.id];
-          const showReadMore = post.content.length > 200;
+          const showReadMore = post.content?.length > 200;
 
           return (
             <article
               key={post.id}
-              className="w-[85%] bg-[#D7D5BE] rounded-2xl text-center p-4"
+              className="w-[85%] bg-[#D7D5BE] rounded-2xl text-center p-4 shadow-md"
             >
-              <h2 className="font-sans text-[#3E452A] text-2xl font-bold">
-                <strong>{post.title}</strong>
+              <h2 className="font-sans text-[#3E452A] text-2xl font-bold mb-2">
+                {post.title}
               </h2>
-              <p className="font-mono">
+              <p className="font-mono text-[#3E452A]">
                 {isExpanded ? post.content : truncateText(post.content, 200)}
               </p>
-              <img
-                src={post.imageUrl}
-                alt="Obraz"
-                className="scale-90 h-48 rounded-lg"
-              />
+              {post.imageUrl && (
+                <img
+                  src={post.imageUrl}
+                  alt={post.title}
+                  className="scale-90 h-48 rounded-lg object-cover mx-auto mt-3"
+                />
+              )}
               {showReadMore && (
                 <button
                   onClick={() => toggleExpand(post.id)}

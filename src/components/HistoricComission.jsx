@@ -1,53 +1,7 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import HeaderBar from "./HeaderBar";
+import CategoryPosts from "../CategoryPosts";
 
 const HistoricComission = () => {
-  const [posts, setPosts] = useState([]);
-
-  const API_URL =
-    "https://hib2xshxpi7aict3l2hqlbqcx40bmwnh.lambda-url.us-east-1.on.aws";
-
-  const fetchPosts = async () => {
-    const res = await axios.get(`${API_URL}/api/posts`);
-    const filteredPosts = res.data.filter(
-      (post) => post.category === "Komisja Historyczna"
-    );
-    setPosts(filteredPosts);
-  };
-
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
-  return (
-    <main className="bg-[#78815E] w-screen h-screen flex flex-col gap-4">
-      <HeaderBar />
-      {posts.length === 0 ? (
-        <p className="text-[#D7D5BE]">Brak wpisów</p>
-      ) : (
-        posts.map((post) => (
-          <article
-            key={post.id}
-            className="bg-[#D7D5BE] w-[80%] rounded-2xl p-4 text-center"
-          >
-            <h2 className="text-2xl font-bold text-[#3E452A]">{post.title}</h2>
-            <p className="mt-2">{post.content}</p>
-            {post.image && (
-              <img
-                src={post.image}
-                alt="obrazek posta"
-                className="scale-90 h-48 object-cover mx-auto mt-4 rounded-lg"
-              />
-            )}
-          </article>
-        ))
-      )}
-      <footer className="text-white mt-auto">
-        &copy; {new Date().getFullYear()} AIMEXA | Wszystkie prawa zastrzeżone
-      </footer>
-    </main>
-  );
+  return <CategoryPosts category="Komisja Historyczna" />;
 };
 
 export default HistoricComission;
