@@ -1,11 +1,9 @@
 import { useState } from "react";
-import { collection, query, orderBy } from "firebase/firestore";
-import { db } from "../../firebase";
 import useFirestoreCollection from "../../useFirestoreCollection";
 
 const Articles = () => {
   const [expandedPost, setExpandedPost] = useState({});
-  const posts = useFirestoreCollection("posts", "createdAt"); // 🔥 Twój hook już ogarnia sortowanie
+  const posts = useFirestoreCollection("posts", "createdAt");
 
   const toggleExpand = (postId) => {
     setExpandedPost((prev) => ({ ...prev, [postId]: !prev[postId] }));
@@ -36,13 +34,29 @@ const Articles = () => {
               <p className="font-mono text-[#3E452A]">
                 {isExpanded ? post.content : truncateText(post.content, 200)}
               </p>
-              {post.image && (
-                <img
-                  src={post.image}
-                  alt={post.title}
-                  className="scale-90 h-48 rounded-lg object-cover mx-auto mt-3"
-                />
+
+              {/* ✅ Obsługa wielu zdjęć */}
+              {post.images && post.images.length > 0 ? (
+                <div className="flex flex-wrap justify-center gap-4 mt-3">
+                  {post.images.map((url, idx) => (
+                    <img
+                      key={idx}
+                      src={url}
+                      alt={`${post.title}-${idx}`}
+                      className="h-48 w-auto object-cover rounded-lg shadow"
+                    />
+                  ))}
+                </div>
+              ) : (
+                post.image && (
+                  <img
+                    src={post.image}
+                    alt={post.title}
+                    className="scale-90 h-48 rounded-lg object-cover mx-auto mt-3"
+                  />
+                )
               )}
+
               {showReadMore && (
                 <button
                   onClick={() => toggleExpand(post.id)}

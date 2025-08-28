@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   addDoc,
   collection,
@@ -17,7 +18,7 @@ const AdminPage = () => {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
   const [content, setContent] = useState("");
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [editingPost, setEditingPost] = useState(null);
 
@@ -25,35 +26,49 @@ const AdminPage = () => {
   const serviceMessages = useFirestoreCollection("serviceMessages");
   const contactMessages = useFirestoreCollection("messages");
 
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const isAdmin = localStorage.getItem("isAdmin");
+    if (!isAdmin) {
+      navigate("/login");
+    }
+  }, [navigate]);
+
   const handleCreatePost = async () => {
     if (!title || !content) return alert("Uzupełnij tytuł i treść!");
 
     try {
-      let imageUrl = null;
+      let imageUrls = [];
 
-      // jeśli wybrano plik, wrzuć go do Storage
-      if (file) {
-        const storageRef = ref(storage, `posts/${Date.now()}-${file.name}`);
-        await uploadBytes(storageRef, file);
-        imageUrl = await getDownloadURL(storageRef);
+      // Jeśli wybrano pliki → wrzucamy wszystkie do Firebase Storage
+      if (files.length > 0) {
+        for (const file of files) {
+          const storageRef = ref(storage, `posts/${Date.now()}-${file.name}`);
+          await uploadBytes(storageRef, file);
+          const url = await getDownloadURL(storageRef);
+          imageUrls.push(url);
+        }
       }
 
-      // zapis dokumentu w Firestore
+      // Zapis dokumentu w Firestore
       await addDoc(collection(db, "posts"), {
         title,
         content,
         category,
-        image: imageUrl, // ✅ zapisujemy link do zdjęcia
+        images: imageUrls, // <-- teraz zapisujemy tablicę zdjęć
         createdAt: serverTimestamp(),
       });
 
+      // Reset formularza
       setTitle("");
       setContent("");
       setCategory("");
-      setFile(null);
+      setFiles([]);
       alert("Post dodany!");
     } catch (err) {
       console.error("Błąd przy dodawaniu posta:", err);
+      alert("Nie udało się dodać posta");
     }
   };
 
@@ -138,6 +153,14 @@ const AdminPage = () => {
         >
           Wyjątkowe zdjęcia
         </button>
+        <button
+          onClick={() => {
+            localStorage.removeItem("isAdmin");
+            navigate("/login");
+          }}
+        >
+          Wyloguj
+        </button>
       </aside>
 
       {/* Main Content */}
@@ -160,7 +183,8 @@ const AdminPage = () => {
             />
             <input
               type="file"
-              onChange={(e) => setFile(e.target.files[0])}
+              multiple
+              onChange={(e) => setFiles([...e.target.files])}
               className="w-full p-2 rounded bg-white"
             />
 
@@ -199,12 +223,17 @@ const AdminPage = () => {
                   <p className="text-sm font-mono">
                     {post.content.slice(0, 100)}...
                   </p>
-                  {post.image && (
-                    <img
-                      src={post.image}
-                      alt="Post"
-                      className="scale-90 h-60 mt-2 rounded"
-                    />
+                  {post.images && post.images.length > 0 && (
+                    <div className="flex flex-wrap justify-center gap-2 mt-2">
+                      {post.images.map((url, idx) => (
+                        <img
+                          key={idx}
+                          src={url}
+                          alt={`Post ${idx}`}
+                          className="h-40 w-auto rounded shadow"
+                        />
+                      ))}
+                    </div>
                   )}
                   <button
                     onClick={() => handleDeletePost(post.id)}

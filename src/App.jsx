@@ -13,6 +13,7 @@ import FEN from "./components/FEN.jsx";
 import Messages from "./components/Messages.jsx";
 import ServiceMessages from "./components/ServiceMessages.jsx";
 import Photos from "./components/photos.jsx";
+import AdminLogin from "./cms/AdminLogin.jsx";
 
 const App = () => {
   return (
@@ -20,7 +21,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/posts" element={<Articles />} />
-        <Route path="/page" element={<AdminPage />} />
+        <Route path="/admin" element={<AdminPage />} />
         <Route path="/komisja-historyczna" element={<HistoricComission />} />
         <Route path="/panteon" element={<Panteon />} />
         <Route path="/sztandary" element={<Banners />} />
@@ -32,6 +33,7 @@ const App = () => {
         <Route path="/messages" element={<Messages />} />
         <Route path="/serviceMessages" element={<ServiceMessages />} />
         <Route path="/photos" element={<Photos />} />
+        <Route path="/login" element={<AdminLogin />} />
       </Routes>
     </Router>
   );

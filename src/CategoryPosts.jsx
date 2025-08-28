@@ -18,12 +18,27 @@ const CategoryPosts = ({ category }) => {
           >
             <h2 className="text-2xl font-bold text-[#3E452A]">{post.title}</h2>
             <p className="mt-2 text-[#3E452A]">{post.content}</p>
-            {post.image && (
-              <img
-                src={post.image}
-                alt={post.title}
-                className="scale-90 h-48 object-cover mx-auto mt-4 rounded-lg"
-              />
+
+            {/* ✅ Obsługa wielu zdjęć */}
+            {post.images && post.images.length > 0 ? (
+              <div className="flex flex-wrap justify-center gap-4 mt-4">
+                {post.images.map((url, idx) => (
+                  <img
+                    key={idx}
+                    src={url}
+                    alt={`${post.title}-${idx}`}
+                    className="h-48 w-auto object-cover rounded-lg shadow"
+                  />
+                ))}
+              </div>
+            ) : (
+              post.image && (
+                <img
+                  src={post.image}
+                  alt={post.title}
+                  className="scale-90 h-48 object-cover mx-auto mt-4 rounded-lg"
+                />
+              )
             )}
           </article>
         ))

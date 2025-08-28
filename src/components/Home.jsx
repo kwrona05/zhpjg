@@ -63,14 +63,6 @@ const Home = () => {
       <footer className="w-full text-center text-white text-sm">
         &copy; {new Date().getFullYear()} AIMEXA | Wszystkie prawa zastrzeżone
       </footer> */}
-
-      {/* BUTTON */}
-      <button
-        onClick={() => navigate("/page")}
-        className="fixed bottom-6 right-6 bg-[#3E452A] text-white px-5 py-3 rounded-full shadow-lg hover:bg-[#2e331f] transition"
-      >
-        Admin
-      </button>
     </div>
   );
 };
