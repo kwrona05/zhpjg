@@ -36,9 +36,9 @@ const Articles = () => {
               <p className="font-mono text-[#3E452A]">
                 {isExpanded ? post.content : truncateText(post.content, 200)}
               </p>
-              {post.imageUrl && (
+              {post.image && (
                 <img
-                  src={post.imageUrl}
+                  src={post.image}
                   alt={post.title}
                   className="scale-90 h-48 rounded-lg object-cover mx-auto mt-3"
                 />

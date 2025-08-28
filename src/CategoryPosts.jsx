@@ -18,9 +18,9 @@ const CategoryPosts = ({ category }) => {
           >
             <h2 className="text-2xl font-bold text-[#3E452A]">{post.title}</h2>
             <p className="mt-2 text-[#3E452A]">{post.content}</p>
-            {post.imageUrl && (
+            {post.image && (
               <img
-                src={post.imageUrl}
+                src={post.image}
                 alt={post.title}
                 className="scale-90 h-48 object-cover mx-auto mt-4 rounded-lg"
               />
