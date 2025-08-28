@@ -1,26 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import axios from "axios";
+import useFirestoreCollection from "../../useFirestoreCollection";
 
 const PhotosPlayer = () => {
-  const [photos, setPhotos] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
+  const photos = useFirestoreCollection("gallery", "createdAt", {
+    field: "featured",
+    op: "==",
+    value: true,
+  });
   const photosPerPage = 3;
-
-  const API_URL =
-    "https://hib2xshxpi7aict3l2hqlbqcx40bmwnh.lambda-url.us-east-1.on.aws";
-
-  useEffect(() => {
-    const fetchPhotos = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/api/photos`);
-        setPhotos(res.data);
-      } catch (error) {
-        console.error("Błąd przy pobieraniu zdjęć:", error);
-      }
-    };
-    fetchPhotos();
-  }, []);
 
   const totalPages = Math.ceil(photos.length / photosPerPage);
 
@@ -38,7 +27,7 @@ const PhotosPlayer = () => {
   );
 
   return (
-    <div className="relative w-[85%] h-60  bg-[#D7D5BE] rounded-2xl flex items-center">
+    <div className="relative w-[85%] h-60 bg-[#D7D5BE] rounded-2xl flex items-center mx-auto">
       {/* Strzałka lewa */}
       <button
         onClick={handlePrev}
@@ -61,7 +50,7 @@ const PhotosPlayer = () => {
             <div className="text-center w-full">Brak zdjęć do wyświetlenia</div>
           )}
 
-          {photos.map((photo) => (
+          {visiblePhotos.map((photo) => (
             <div
               key={photo.id}
               className="flex-shrink-0 w-1/3 px-2 flex flex-col items-center relative"
@@ -70,7 +59,7 @@ const PhotosPlayer = () => {
               <div className="scale-90 h-48 rounded-lg relative group">
                 <img
                   src={photo.url}
-                  alt={photo.description}
+                  alt={photo.caption}
                   className="max-h-full max-w-full object-contain rounded-xl"
                 />
                 <div
@@ -81,7 +70,7 @@ const PhotosPlayer = () => {
       transition-all duration-300 ease-in-out
       rounded-b-xl"
                 >
-                  {photo.description}
+                  {photo.caption}
                 </div>
               </div>
             </div>
