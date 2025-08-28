@@ -1,22 +1,23 @@
 import { useState } from "react";
+import useFirestoreCollection from "../../useFirestoreCollection";
 
 const SearchPost = ({ onResults }) => {
   const [query, setQuery] = useState("");
+  const posts = useFirestoreCollection("posts", "createdAt"); // pobiera wszystkie
 
-  const API_URL =
-    "https://hib2xshxpi7aict3l2hqlbqcx40bmwnh.lambda-url.us-east-1.on.aws";
-
-  const searchPosts = async () => {
-    const res = await fetch(
-      `${API_URL}/api/posts?search=${encodeURIComponent(query)}`
-    );
-    if (!res.ok) {
-      const text = await res.text();
-      console.error("Błąd HTTP:", res.status, text);
+  const searchPosts = () => {
+    if (!query.trim()) {
+      onResults(posts); // jeśli puste, zwracamy całość
       return;
     }
-    const data = await res.json();
-    onResults(data); // przekaż wyniki do komponentu nadrzędnego
+
+    const lowerQuery = query.toLowerCase();
+    const filtered = posts.filter(
+      (post) =>
+        post.title?.toLowerCase().includes(lowerQuery) ||
+        post.content?.toLowerCase().includes(lowerQuery)
+    );
+    onResults(filtered);
   };
 
   return (
