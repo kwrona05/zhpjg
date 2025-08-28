@@ -1,104 +1,86 @@
 import { useState } from "react";
-import {
-  ref,
-  uploadBytes,
-  getDownloadURL,
-  deleteObject,
-} from "firebase/storage";
-import { collection, addDoc, deleteDoc, doc } from "firebase/firestore";
 import { db, storage } from "../../firebase";
-import useFirestoreCollection from "../../useFirestoreCollection";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const AdminAddPhoto = () => {
   const [file, setFile] = useState(null);
   const [caption, setCaption] = useState("");
-  const photos = useFirestoreCollection("gallery"); // <- nasz hook
+  const [featured, setFeatured] = useState(false); // 🔥 checkbox
+  const [loading, setLoading] = useState(false);
 
-  const handleUpload = async () => {
-    if (!file) return alert("Wybierz zdjęcie!");
+  const handleUpload = async (e) => {
+    e.preventDefault();
+    if (!file) return alert("Wybierz plik!");
 
     try {
-      const storageRef = ref(storage, `gallery/${Date.now()}-${file.name}`);
+      setLoading(true);
+
+      // 1. Upload pliku do Firebase Storage
+      const storageRef = ref(storage, `gallery/${file.name}`);
       await uploadBytes(storageRef, file);
       const url = await getDownloadURL(storageRef);
 
+      // 2. Zapis metadanych w Firestore
       await addDoc(collection(db, "gallery"), {
         url,
         caption,
-        createdAt: new Date(),
-        storagePath: storageRef.fullPath,
+        featured, // 🔥 dodajemy info, czy ma iść do PhotosPlayer
+        createdAt: serverTimestamp(),
       });
 
+      alert("Zdjęcie dodane!");
       setFile(null);
       setCaption("");
+      setFeatured(false);
     } catch (err) {
-      console.error("Błąd przy dodawaniu zdjęcia:", err);
-    }
-  };
-
-  const handleDelete = async (photo) => {
-    if (!window.confirm("Czy na pewno chcesz usunąć to zdjęcie?")) return;
-
-    try {
-      const fileRef = ref(storage, photo.storagePath);
-      await deleteObject(fileRef);
-      await deleteDoc(doc(db, "gallery", photo.id));
-    } catch (err) {
-      console.error("Błąd przy usuwaniu zdjęcia:", err);
+      console.error("Błąd przy uploadzie:", err);
+      alert("Nie udało się przesłać zdjęcia.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      <h2 className="text-2xl font-bold">Dodaj zdjęcie</h2>
+    <form
+      onSubmit={handleUpload}
+      className="flex flex-col gap-4 bg-white p-4 rounded-xl shadow-md w-[400px]"
+    >
+      <h2 className="text-xl font-bold text-[#3E452A]">Dodaj zdjęcie</h2>
+
       <input
         type="file"
+        accept="image/*"
         onChange={(e) => setFile(e.target.files[0])}
-        className="p-2 bg-white rounded"
+        className="border p-2 rounded"
       />
+
       <input
         type="text"
+        placeholder="Podpis zdjęcia"
         value={caption}
         onChange={(e) => setCaption(e.target.value)}
-        placeholder="Podpis / opis zdjęcia"
-        className="p-2 bg-white rounded"
+        className="border p-2 rounded"
       />
-      <button
-        onClick={handleUpload}
-        className="bg-[#BCA97A] hover:bg-[#c5c3aa] text-[#3E452A] font-bold py-2 px-6 rounded-xl shadow-md transition duration-300 w-40"
-      >
-        Prześlij
-      </button>
 
-      <h3 className="text-xl font-semibold mt-6">📷 Galeria</h3>
-      {photos.length === 0 ? (
-        <p className="text-[#3E452A]">Brak zdjęć</p>
-      ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {photos.map((photo) => (
-            <div
-              key={photo.id}
-              className="bg-white p-2 rounded shadow relative"
-            >
-              <img
-                src={photo.url}
-                alt={photo.caption}
-                className="rounded mb-2"
-              />
-              {photo.caption && (
-                <p className="text-sm text-gray-700">{photo.caption}</p>
-              )}
-              <button
-                onClick={() => handleDelete(photo)}
-                className="absolute top-2 right-2 bg-red-600 hover:bg-red-700 text-white text-xs px-2 py-1 rounded"
-              >
-                🗑️
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+      {/* 🔥 checkbox do wyboru zdjęć do galerii */}
+      <label className="flex items-center gap-2 text-[#3E452A]">
+        <input
+          type="checkbox"
+          checked={featured}
+          onChange={(e) => setFeatured(e.target.checked)}
+        />
+        Dodaj do galerii
+      </label>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="bg-[#3E452A] text-white px-4 py-2 rounded hover:bg-[#2f351d]"
+      >
+        {loading ? "Wysyłanie..." : "Dodaj zdjęcie"}
+      </button>
+    </form>
   );
 };
 
