@@ -1,16 +1,27 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import HeaderBar from "./HeaderBar.jsx";
 import "../App.css";
 import PhotosPlayer from "./PhotosPlayer.jsx";
 import Articles from "./Articles.jsx";
-import SearchPost from "./SearchPost.jsx";
-import SearchResults from "./SearchResults.jsx";
-import { useNavigate } from "react-router-dom";
+import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { db } from "../../firebase.js";
 
 const Home = () => {
-  const [showSearch, setShowSearch] = useState(false);
-  const [searchResults, setSearchResults] = useState([]);
-  const navigate = useNavigate();
+  const [playerImages, setPlayerImages] = useState([]);
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      const q = query(collection(db, "gallery"), orderBy("createdAt", "desc"));
+      const snapshot = await getDocs(q);
+      const images = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setPlayerImages(images);
+    };
+
+    fetchImages();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen w-screen bg-[#78815E] text-gray-800">
@@ -36,28 +47,12 @@ const Home = () => {
         <div className="w-full py-4 px-4">
           <HeaderBar />
         </div>
-
-        {/* SEARCH */}
-        {showSearch && (
-          <div className="w-full px-4">
-            <SearchPost onResults={setSearchResults} />
-          </div>
-        )}
-
-        {/* SEARCH RESULTS */}
-        {searchResults.length > 0 && <SearchResults results={searchResults} />}
-
-        {/* DEFAULT CONTENT */}
-        {searchResults.length === 0 && (
-          <>
-            <div className="flex flex-col items-center w-full">
-              <PhotosPlayer />
-            </div>
-            <div className="flex flex-col items-center w-full">
-              <Articles />
-            </div>
-          </>
-        )}
+        <div className="flex flex-col items-center w-full">
+          <PhotosPlayer photos={playerImages} />
+        </div>
+        <div className="flex flex-col items-center w-full">
+          <Articles />
+        </div>
       </div>
       {/* FOOTER
       <footer className="w-full text-center text-white text-sm">
