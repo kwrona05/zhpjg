@@ -1,73 +1,68 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Menu, X } from "lucide-react"; // ikonki do hamburgera
+
+const navItems = [
+  { path: "/", label: "Home" },
+  { path: "/komisja-historyczna", label: "Komisja Historyczna" },
+  { path: "/panteon", label: "Panteon" },
+  { path: "/posts", label: "Publikacje" },
+  { path: "/sztandary", label: "Sztandary" },
+  { path: "/muzeum", label: "Muzeum" },
+  { path: "/choragiew", label: "Chorągiew" },
+  { path: "/hufiec", label: "Hufiec" },
+  { path: "/kontakt", label: "Kontakt" },
+  { path: "/fen", label: "FEN" },
+];
 
 const HeaderBar = () => {
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="font-mono flex flex-row justify-center w-full h-16 shadow-md py-4 px-6 sticky top-0 z-50 bg-[#3E452A]">
-      <nav className="flex items-center justify-center gap-15 text-[#D7D5BE] font-medium text-base text-center bg-[#3E452A]">
-        <div
-          onClick={() => navigate("/")}
-          className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition"
+    <header className="sticky top-0 z-50 w-full bg-[#3E452A] shadow-md">
+      <div className="max-w-7xl mx-auto flex items-center justify-center px-6 py-4 relative">
+        {/* Hamburger (mobile) */}
+        <button
+          className="md:hidden absolute left-6 text-[#D7D5BE]"
+          onClick={() => setIsOpen(!isOpen)}
+          aria-label="Toggle menu"
         >
-          Home
-        </div>
-        <div
-          onClick={() => navigate("/komisja-historyczna")}
-          className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition"
-        >
-          Komisja Historyczna
-        </div>
-        <div
-          onClick={() => navigate("/panteon")}
-          className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition"
-        >
-          Panteon
-        </div>
-        <div
-          onClick={() => navigate("/posts")}
-          className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition"
-        >
-          Publikacje
-        </div>
-        <div
-          onClick={() => navigate("/sztandary")}
-          className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition"
-        >
-          Sztandary
-        </div>
-        <div
-          onClick={() => navigate("/muzeum")}
-          className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition"
-        >
-          Muzeum
-        </div>
-        <div
-          onClick={() => navigate("/choragiew")}
-          className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition"
-        >
-          Chorągiew
-        </div>
-        <div
-          onClick={() => navigate("/hufiec")}
-          className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition"
-        >
-          Hufiec
-        </div>
-        <div
-          onClick={() => navigate("/kontakt")}
-          className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition"
-        >
-          Kontakt
-        </div>
-        <div
-          onClick={() => navigate("/fen")}
-          className="h-16 flex items-center cursor-pointer border-b-2 border-transparent hover:border-[#BFD7EA] hover:text-[#BFD7EA] transition"
-        >
-          FEN
-        </div>
-      </nav>
-    </div>
+          {isOpen ? <X size={28} /> : <Menu size={28} />}
+        </button>
+
+        {/* Nawigacja desktop */}
+        <nav className="hidden md:flex gap-x-8 text-[#D7D5BE] font-medium">
+          {navItems.map((item) => (
+            <span
+              key={item.path}
+              onClick={() => navigate(item.path)}
+              className="relative cursor-pointer transition hover:text-[#BFD7EA] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-[2px] after:bg-[#BFD7EA] hover:after:w-full after:transition-all after:duration-300"
+            >
+              {item.label}
+            </span>
+          ))}
+        </nav>
+      </div>
+
+      {/* Nawigacja mobile */}
+      {isOpen && (
+        <nav className="md:hidden bg-[#3E452A] flex flex-col items-center gap-4 py-6 text-[#D7D5BE] font-medium">
+          {navItems.map((item) => (
+            <span
+              key={item.path}
+              onClick={() => {
+                navigate(item.path);
+                setIsOpen(false);
+              }}
+              className="cursor-pointer hover:text-[#BFD7EA] transition"
+            >
+              {item.label}
+            </span>
+          ))}
+        </nav>
+      )}
+    </header>
   );
 };
 

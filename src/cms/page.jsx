@@ -11,7 +11,6 @@ import {
 import { db, storage } from "../../firebase";
 import useFirestoreCollection from "../../useFirestoreCollection";
 import UpdatePost from "./UpdatePost";
-import AdminAddPhoto from "./PhotoFile";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import PhotosPlayer from "../components/PhotosPlayer";
 
@@ -40,7 +39,7 @@ const AdminPage = () => {
 
   const fetchPlayerImages = async () => {
     try {
-      const snapshot = await getDocs(collection(db, "gallery")); // 👈 zamiast "playerPhotos"
+      const snapshot = await getDocs(collection(db, "gallery"));
       const images = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
@@ -56,8 +55,6 @@ const AdminPage = () => {
 
     try {
       let imageUrls = [];
-
-      // Jeśli wybrano pliki → wrzucamy wszystkie do Firebase Storage
       if (files.length > 0) {
         for (const file of files) {
           const storageRef = ref(storage, `posts/${Date.now()}-${file.name}`);
@@ -67,16 +64,14 @@ const AdminPage = () => {
         }
       }
 
-      // Zapis dokumentu w Firestore
       await addDoc(collection(db, "posts"), {
         title,
         content,
         category,
-        images: imageUrls, // <-- teraz zapisujemy tablicę zdjęć
+        images: imageUrls,
         createdAt: serverTimestamp(),
       });
 
-      // Reset formularza
       setTitle("");
       setContent("");
       setCategory("");
@@ -90,7 +85,6 @@ const AdminPage = () => {
 
   const handleDeletePost = async (postId) => {
     if (!window.confirm("Czy na pewno chcesz usunąć wpis?")) return;
-
     try {
       await deleteDoc(doc(db, "posts", postId));
     } catch (error) {
@@ -151,7 +145,6 @@ const AdminPage = () => {
           url,
           createdAt: serverTimestamp(),
         });
-        // od razu dodajemy do stanu lokalnego, żeby PhotosPlayer odświeżył się natychmiast
         setPlayerImages((prev) => [...prev, { id: docRef.id, url }]);
       }
 
@@ -166,55 +159,49 @@ const AdminPage = () => {
   return (
     <div className="w-screen flex h-screen">
       {/* Sidebar */}
-      <aside className="w-64 bg-[#3E452A] text-white p-6 flex flex-col gap-4">
+      <aside className="w-64 bg-[#3E452A] text-white p-6 flex flex-col gap-3">
         <h2 className="text-xl font-bold mb-4">Panel admina</h2>
-        <button
-          onClick={() => setActiveSection("addPost")}
-          className="w-[90%] bg-[#D7D5BE] hover:bg-[#BCA97A] text-[#3E452A] p-2 rounded"
-        >
-          ➕ Dodaj wpis
-        </button>
-        <button
-          onClick={() => setActiveSection("posts")}
-          className="w-[90%] bg-[#D7D5BE] hover:bg-[#BCA97A] text-[#3E452A] p-2 rounded"
-        >
-          📋 Wpisy
-        </button>
-        <button
-          onClick={() => setActiveSection("messages")}
-          className="w-[90%] bg-[#D7D5BE] hover:bg-[#BCA97A] text-[#3E452A] p-2 rounded"
-        >
-          🛠️ Wiadomości serwisowe
-        </button>
-        <button
-          onClick={() => setActiveSection("contactMessages")}
-          className="w-[90%] bg-[#D7D5BE] hover:bg-[#BCA97A] text-[#3E452A] p-2 rounded"
-        >
-          Powiadomienia
-        </button>
-        <button
-          onClick={() => setActiveSection("gallery")}
-          className="w-[90%] bg-[#D7D5BE] hover:bg-[#BCA97A] text-[#3E452A] p-2 rounded"
-        >
-          Wyjątkowe zdjęcia
-        </button>
-        <button onClick={() => setActiveSection("photoPlayer")}>Galeria</button>
+
+        {[
+          { key: "addPost", label: "➕ Dodaj wpis" },
+          { key: "posts", label: "📋 Wpisy" },
+          { key: "messages", label: "🛠️ Wiadomości serwisowe" },
+          { key: "contactMessages", label: "📩 Powiadomienia" },
+          { key: "gallery", label: "🖼️ Wyjątkowe zdjęcia" },
+          { key: "photoPlayer", label: "🎞️ Galeria" },
+        ].map((item) => (
+          <button
+            key={item.key}
+            onClick={() => setActiveSection(item.key)}
+            className={`w-[90%] text-left px-3 py-2 rounded transition ${
+              activeSection === item.key
+                ? "bg-[#BCA97A] text-[#3E452A] font-bold"
+                : "bg-[#D7D5BE] text-[#3E452A] hover:bg-[#BCA97A]"
+            }`}
+          >
+            {item.label}
+          </button>
+        ))}
+
         <button
           onClick={() => {
             localStorage.removeItem("isAdmin");
             navigate("/login");
           }}
+          className="mt-auto w-[90%] bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded"
         >
-          Wyloguj
+          🚪 Wyloguj
         </button>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 bg-[#CAD2C5] p-6 overflow-y-auto">
+      <main className="flex-1 bg-[#CAD2C5] p-6 overflow-y-auto flex flex-col items-center">
         {/* Dodaj wpis */}
         {activeSection === "addPost" && (
-          <div className="max-w-xl space-y-4 flex flex-col gap-4">
-            <h2 className="text-2xl font-bold">Dodaj nowy wpis</h2>
+          <div className="w-full max-w-4xl space-y-4 p-6 bg-[#D7D5BE] rounded-2xl shadow flex flex-col">
+            <h2 className="text-2xl font-bold text-[#3E452A] text-center">
+              Dodaj nowy wpis
+            </h2>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -233,7 +220,6 @@ const AdminPage = () => {
               onChange={(e) => setFiles([...e.target.files])}
               className="w-full p-2 rounded bg-white"
             />
-
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
@@ -251,21 +237,26 @@ const AdminPage = () => {
             </select>
             <button
               onClick={handleCreatePost}
-              className="bg-[#BCA97A] w-[60%] hover:bg-[#c5c3aa] text-[#3E452A] font-bold py-2 px-6 rounded-xl shadow-md transition duration-300"
+              className="bg-[#BCA97A] w-[60%] self-center hover:bg-[#A99956] text-[#3E452A] font-bold py-2 px-6 rounded-lg shadow-md transition"
             >
               Opublikuj
             </button>
           </div>
         )}
+
         {/* Lista wpisów */}
         {activeSection === "posts" && (
-          <div className="flex flex-col gap-4">
-            <h2 className="text-2xl font-bold mb-4">Lista wpisów</h2>
-            <ul className="space-y-4 w-[85%] bg-[#D7D5BE] rounded-2xl text-center p-4">
+          <div className="w-full max-w-4xl flex flex-col gap-4 items-center">
+            <h2 className="text-2xl font-bold mb-4 text-[#3E452A] text-center">
+              Lista wpisów
+            </h2>
+            <ul className="space-y-4 w-full bg-[#D7D5BE] rounded-2xl text-center p-4">
               {posts.map((post) => (
                 <li key={post.id} className="bg-white rounded shadow p-4">
-                  <h3 className="font-bold font-sans text-lg">{post.title}</h3>
-                  <p className="text-sm font-mono">
+                  <h3 className="font-bold font-sans text-lg text-[#3E452A]">
+                    {post.title}
+                  </h3>
+                  <p className="text-sm font-mono text-[#3E452A]">
                     {post.content.slice(0, 100)}...
                   </p>
                   {post.images && post.images.length > 0 && (
@@ -280,18 +271,20 @@ const AdminPage = () => {
                       ))}
                     </div>
                   )}
-                  <button
-                    onClick={() => handleDeletePost(post.id)}
-                    className="mt-2 bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded transition duration-300"
-                  >
-                    Usuń
-                  </button>
-                  <button
-                    onClick={() => setEditingPost(post)}
-                    className="ml-2 bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded transition duration-300"
-                  >
-                    Edytuj
-                  </button>
+                  <div className="flex justify-center gap-2 mt-2">
+                    <button
+                      onClick={() => handleDeletePost(post.id)}
+                      className="bg-red-600 hover:bg-red-700 text-white py-1 px-3 rounded transition duration-300"
+                    >
+                      Usuń
+                    </button>
+                    <button
+                      onClick={() => setEditingPost(post)}
+                      className="bg-blue-500 hover:bg-blue-600 text-white py-1 px-3 rounded transition duration-300"
+                    >
+                      Edytuj
+                    </button>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -299,32 +292,31 @@ const AdminPage = () => {
               <UpdatePost
                 post={editingPost}
                 onClose={() => setEditingPost(null)}
-                onUpdated={(updatedPost) => {
-                  setEditingPost(null);
-                }}
+                onUpdated={() => setEditingPost(null)}
               />
             )}
           </div>
         )}
+
         {/* Wiadomości serwisowe */}
         {activeSection === "messages" && (
-          <div className="flex flex-col gap-4 text-center">
-            <h2 className="text-2xl font-bold font-sans mb-4">
+          <div className="w-full max-w-4xl flex flex-col gap-4 items-center text-center">
+            <h2 className="text-2xl font-bold text-[#3E452A] mb-4">
               Wiadomości serwisowe
             </h2>
             <form
               onSubmit={handleServiceMessage}
-              className="flex gap-2 mb-4 p-4"
+              className="flex gap-2 mb-4 p-4 bg-[#D7D5BE] rounded-2xl shadow w-full"
             >
               <textarea
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Wpisz nową wiadomość..."
-                className="w-80 flex-1 p-2 rounded text-[#3E452A] bg-white"
+                className="flex-1 p-2 rounded text-[#3E452A] bg-white"
               />
               <button
                 type="submit"
-                className="w-30 bg-[#BCA97A] hover:bg-[#c5c3aa] text-[#3E452A] px-4 py-2 rounded shadow-md"
+                className="bg-[#BCA97A] hover:bg-[#A99956] text-[#3E452A] px-4 py-2 rounded shadow-md"
               >
                 ➕ Dodaj
               </button>
@@ -332,11 +324,11 @@ const AdminPage = () => {
             {serviceMessages.length === 0 ? (
               <p className="text-[#3E452A]">Brak wiadomości serwisowych</p>
             ) : (
-              <ul className="w-full flex flex-col gap-4">
+              <ul className="w-full flex flex-col gap-4 items-center">
                 {serviceMessages.map((msg) => (
                   <li
                     key={msg.id}
-                    className="w-[80%] bg-white p-4 rounded shadow flex justify-between items-center text-wrap"
+                    className="w-full max-w-2xl bg-white p-4 rounded shadow flex justify-between items-center text-wrap"
                   >
                     <p className="text-[#3E452A]">{msg.text}</p>
                     <button
@@ -351,18 +343,21 @@ const AdminPage = () => {
             )}
           </div>
         )}
+
         {/* Wiadomości kontaktowe */}
         {activeSection === "contactMessages" && (
-          <div className="flex flex-col gap-4 text-center">
-            <h2 className="text-2xl font-bold mb-4">Wiadomości kontaktowe</h2>
+          <div className="w-full max-w-4xl flex flex-col gap-4 items-center text-center">
+            <h2 className="text-2xl font-bold text-[#3E452A] mb-4">
+              Wiadomości kontaktowe
+            </h2>
             {contactMessages.length === 0 ? (
               <p className="text-[#3E452A]">Brak wiadomości</p>
             ) : (
-              <ul className="w-full flex flex-col gap-4">
+              <ul className="w-full flex flex-col gap-4 items-center">
                 {contactMessages.map((msg) => (
                   <li
                     key={msg.id}
-                    className="w-[80%] bg-white p-4 rounded shadow text-left"
+                    className="w-full max-w-2xl bg-white p-4 rounded shadow text-left"
                   >
                     <p>
                       <strong>Email:</strong> {msg.email}
@@ -385,13 +380,13 @@ const AdminPage = () => {
             )}
           </div>
         )}
+
+        {/* Galeria (Photo Player) */}
         {activeSection === "photoPlayer" && (
-          <div className="max-w-xl flex flex-col gap-4">
-            <h2 className="text-2xl font-bold">
+          <div className="w-full max-w-4xl flex flex-col gap-4 p-6 bg-[#D7D5BE] rounded-2xl shadow">
+            <h2 className="text-2xl font-bold text-[#3E452A] text-center">
               Dodaj zdjęcia do Photo Playera
             </h2>
-
-            {/* formularz uploadu */}
             <input
               type="file"
               multiple
@@ -400,14 +395,12 @@ const AdminPage = () => {
             />
             <button
               onClick={handleAddPlayerPhotos}
-              className="bg-[#BCA97A] w-[60%] hover:bg-[#c5c3aa] text-[#3E452A] font-bold py-2 px-6 rounded-xl shadow-md transition duration-300"
+              className="bg-[#BCA97A] w-[60%] self-center hover:bg-[#A99956] text-[#3E452A] font-bold py-2 px-6 rounded-lg shadow-md transition"
             >
               Dodaj zdjęcia
             </button>
-
-            {/* Podgląd zdjęć */}
             {playerFiles.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-4">
+              <div className="flex flex-wrap gap-2 mt-4 justify-center">
                 {playerFiles.map((file, idx) => (
                   <img
                     key={idx}
@@ -418,8 +411,6 @@ const AdminPage = () => {
                 ))}
               </div>
             )}
-
-            {/* 👇 Photo Player */}
             <PhotosPlayer photos={playerImages} />
           </div>
         )}

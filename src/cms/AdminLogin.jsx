@@ -3,7 +3,7 @@ import { collection, getDocs, query, where } from "firebase/firestore";
 import { db } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 
-const AdminLogin = ({ onLogin }) => {
+const AdminLogin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -16,7 +16,7 @@ const AdminLogin = ({ onLogin }) => {
 
     try {
       const adminsRef = collection(db, "admins");
-      const q = query(adminsRef, where("login", "==", email)); // <- używamy email
+      const q = query(adminsRef, where("login", "==", email));
       const snapshot = await getDocs(q);
 
       if (snapshot.empty) {
@@ -32,9 +32,8 @@ const AdminLogin = ({ onLogin }) => {
         return;
       }
 
-      // logowanie udane
       localStorage.setItem("isAdmin", "true");
-      navigate("/admin"); // przeniesienie po zalogowaniu
+      navigate("/admin");
     } catch (err) {
       console.error(err);
       setError("Błąd logowania");
@@ -42,35 +41,43 @@ const AdminLogin = ({ onLogin }) => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-200">
+    <main className="flex flex-col items-center justify-center min-h-screen bg-[#78815E] px-4">
       <form
         onSubmit={handleLogin}
-        className="bg-white p-6 rounded shadow-md flex flex-col gap-4 w-80"
+        className="bg-[#D7D5BE] w-full max-w-md p-6 rounded-2xl shadow-lg flex flex-col gap-4"
       >
-        <h2 className="text-xl font-bold text-center">Panel Admina</h2>
+        <h2 className="text-2xl font-bold text-center text-[#3E452A]">
+          Panel Admina
+        </h2>
+
         <input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="p-2 rounded border"
+          className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#3E452A] bg-white"
         />
+
         <input
           type="password"
           placeholder="Hasło"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="p-2 rounded border"
+          className="p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#3E452A] bg-white"
         />
-        {error && <p className="text-red-600 text-center">{error}</p>}
+
+        {error && (
+          <p className="text-red-600 text-center font-medium">{error}</p>
+        )}
+
         <button
           type="submit"
-          className="bg-green-500 text-white py-2 rounded mt-2"
+          className="bg-[#3E452A] text-[#D7D5BE] py-2 rounded-lg mt-2 font-semibold hover:bg-[#2f351d] transition"
         >
           Zaloguj
         </button>
       </form>
-    </div>
+    </main>
   );
 };
 

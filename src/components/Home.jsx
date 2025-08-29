@@ -24,40 +24,53 @@ const Home = () => {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen w-screen bg-[#78815E] text-gray-800">
-      <div className="flex flex-col flex-grow gap-5 items-center">
-        {/* HEADER */}
-        <header className="flex flex-row justify-center items-center w-full gap-2">
-          <img
-            src="/logo.png"
-            alt="Photo1"
-            className="w-16 h-16 object-cover rounded-full"
-          />
-          <h1 className="font-sans text-3xl font-bold text-[#3E452A]">
+    <div className="flex flex-col min-h-screen bg-[#78815E] text-gray-900">
+      <div className="flex flex-col flex-grow gap-12 items-center mt-12">
+        {/* Hero nagłówek */}
+        <div className="bg-[#E5E8DA] rounded-3xl shadow-xl py-8 px-6 w-full mx-auto flex flex-col items-center gap-4">
+          <div className="flex items-center gap-6">
+            <img
+              src="/logo.png"
+              alt="Logo"
+              className="w-16 h-16 object-cover rounded-full shadow-lg border-2 border-[#3E452A]"
+            />
+            <img
+              src="./krzyz.png"
+              alt="Krzyż harcerski"
+              className="w-16 h-16 object-cover rounded-full shadow-lg border-2 border-[#3E452A]"
+            />
+          </div>
+          <h1 className="font-serif text-3xl md:text-5xl font-bold text-[#3E452A] text-center">
             Ocalić od zapomnienia
           </h1>
-          <img
-            src="./krzyz.png"
-            alt="Krzyz harcerski"
-            className="w-16 h-16 object-cover rounded-full"
-          />
-        </header>
+        </div>
 
         {/* HEADERBAR */}
-        <div className="w-full py-4 px-4">
+        <div className="bg-[#E5E8DA] rounded-xl shadow-md py-3 px-4 w-full max-w-[90vw] mx-auto">
           <HeaderBar />
         </div>
-        <div className="flex flex-col items-center w-full">
+
+        {/* GALERIA */}
+        <section className="bg-[#E5E8DA] rounded-2xl shadow-lg p-6 w-full max-w-[90vw] mx-auto flex flex-col items-center">
+          <h2 className="text-2xl md:text-3xl font-semibold text-[#3E452A] mb-6">
+            Galeria wspomnień
+          </h2>
           <PhotosPlayer photos={playerImages} />
-        </div>
-        <div className="flex flex-col items-center w-full">
+        </section>
+
+        {/* ARTYKUŁY */}
+        <section className="bg-[#E5E8DA] rounded-2xl shadow-lg p-6 w-full max-w-[90vw] mx-auto flex flex-col items-center">
+          <h2 className="text-2xl md:text-3xl font-semibold text-[#3E452A] mb-6">
+            Artykuły i wspomnienia
+          </h2>
           <Articles />
-        </div>
+        </section>
       </div>
-      {/* FOOTER
-      <footer className="w-full text-center text-white text-sm">
+
+      {/* FOOTER */}
+      <footer className="w-full mx-auto text-center text-sm text-gray-100 bg-[#3E452A] py-4 mt-12 rounded-t-2xl shadow-inner">
         &copy; {new Date().getFullYear()} AIMEXA | Wszystkie prawa zastrzeżone
-      </footer> */}
+      </footer>
     </div>
   );
 };

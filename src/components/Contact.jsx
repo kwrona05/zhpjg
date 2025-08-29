@@ -9,7 +9,6 @@ const Contact = () => {
   const [userMessage, setUserMessage] = useState("");
   const [submitted, setSubmitted] = useState(false);
 
-  // 🔥 Subskrypcja wiadomości (jeśli chcesz je potem wyświetlać)
   const messages = useFirestoreCollection("messages", "createdAt");
 
   const handleSubmit = async (e) => {
@@ -29,62 +28,74 @@ const Contact = () => {
   };
 
   return (
-    <main className="bg-[#78815E] min-h-screen w-screen flex flex-col items-center gap-4 p-4">
+    <main className="bg-[#78815E] min-h-screen w-screen flex flex-col">
       <HeaderBar />
 
-      <form
-        onSubmit={handleSubmit}
-        className="w-[90%] md:w-[40%] bg-[#EAE9E0] p-4 rounded-xl shadow-md flex flex-col gap-2"
-      >
-        <h2 className="text-[#3E452A] font-bold text-xl mb-2">
-          Masz ciekawe artefakty? Skontaktuj się z nami
-        </h2>
-        <input
-          type="email"
-          placeholder="Twój email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          className="w-full p-2 mb-2 border rounded"
-        />
-        <textarea
-          placeholder="Twoja wiadomość"
-          value={userMessage}
-          onChange={(e) => setUserMessage(e.target.value)}
-          required
-          className="w-full p-2 mb-2 border rounded"
-        />
-        <button
-          type="submit"
-          className="bg-[#3E452A] text-white px-4 py-2 rounded hover:bg-[#2f351d]"
+      {/* Formularz */}
+      <section className="flex flex-col items-center flex-grow px-4 py-8">
+        <form
+          onSubmit={handleSubmit}
+          className="w-full max-w-lg bg-[#EAE9E0] p-6 rounded-2xl shadow-lg flex flex-col gap-4"
         >
-          Wyślij
-        </button>
-        {submitted && (
-          <p className="text-green-600 mt-2">Wiadomość została wysłana!</p>
+          <h2 className="text-[#3E452A] font-serif font-bold text-2xl text-center mb-2">
+            Masz ciekawe artefakty? <br /> Skontaktuj się z nami
+          </h2>
+
+          <input
+            type="email"
+            placeholder="Twój email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="w-full p-3 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#3E452A]"
+          />
+
+          <textarea
+            placeholder="Twoja wiadomość"
+            value={userMessage}
+            onChange={(e) => setUserMessage(e.target.value)}
+            required
+            rows="5"
+            className="w-full p-3 border rounded-lg shadow-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#3E452A]"
+          />
+
+          <button
+            type="submit"
+            className="bg-[#3E452A] text-white px-6 py-3 rounded-xl font-semibold shadow-md hover:bg-[#2f351d] transition"
+          >
+            Wyślij
+          </button>
+
+          {submitted && (
+            <p className="text-green-600 font-medium mt-2 text-center">
+              ✅ Wiadomość została wysłana!
+            </p>
+          )}
+        </form>
+
+        {/* Ostatnie wiadomości */}
+        {messages.length > 0 && (
+          <section className="w-full max-w-2xl bg-[#EAE9E0] mt-10 p-6 rounded-2xl shadow-lg">
+            <h3 className="text-[#3E452A] text-xl font-semibold mb-4 text-center">
+              Ostatnie wiadomości
+            </h3>
+            <ul className="flex flex-col gap-3">
+              {messages.map((msg) => (
+                <li
+                  key={msg.id}
+                  className="p-3 bg-white rounded-lg shadow-sm text-sm text-[#3E452A] border"
+                >
+                  <strong className="block text-[#2f351d]">{msg.email}</strong>
+                  <p className="mt-1">{msg.message}</p>
+                </li>
+              ))}
+            </ul>
+          </section>
         )}
-      </form>
+      </section>
 
-      {/* 🔍 Sekcja tylko do podglądu wszystkich wiadomości (opcjonalna) */}
-      {messages.length > 0 && (
-        <section className="w-[90%] md:w-[60%] bg-white mt-6 p-4 rounded-lg shadow">
-          <h3 className="text-[#3E452A] text-lg font-semibold mb-2">
-            Ostatnie wiadomości
-          </h3>
-          <ul className="flex flex-col gap-2">
-            {messages.map((msg) => (
-              <li
-                key={msg.id}
-                className="p-2 border-b border-gray-200 text-sm text-[#3E452A]"
-              >
-                <strong>{msg.email}:</strong> {msg.message}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      <footer className="text-white mt-auto text-center py-4">
+      {/* Stopka */}
+      <footer className="text-white bg-[#3E452A] mt-auto text-center py-4 rounded-t-2xl shadow-inner">
         &copy; {new Date().getFullYear()} AIMEXA | Wszystkie prawa zastrzeżone
       </footer>
     </main>

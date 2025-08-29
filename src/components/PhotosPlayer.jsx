@@ -17,34 +17,24 @@ const PhotosPlayer = ({ photos = [] }) => {
   );
 
   return (
-    <div className="relative w-full h-60 bg-[#D7D5BE] rounded-2xl flex items-center mt-4">
-      {/* Left arrow */}
-      <button
-        onClick={handlePrev}
-        disabled={currentPage === 0}
-        aria-label="Poprzednie zdjęcie"
-        className="absolute left-0 z-10 h-full px-4 text-[#3E452A] bg-[#BCA97A] disabled:opacity-40 rounded-l-2xl flex items-center justify-center hover:bg-[#A99956] transition-colors"
-      >
-        <ChevronLeft size={28} />
-      </button>
-
+    <div className="relative w-full max-w-6xl mx-auto bg-[#D7D5BE] rounded-2xl shadow-lg overflow-hidden mt-6">
       {/* Photos */}
-      <div className="flex w-full px-16 py-6 justify-center">
+      <div className="flex justify-center gap-4 px-6 py-6 flex-nowrap overflow-x-auto">
         {visiblePhotos.length === 0 ? (
           <div className="text-center w-full text-[#3E452A]">Brak zdjęć</div>
         ) : (
           visiblePhotos.map((photo) => (
             <div
               key={photo.id}
-              className="flex-shrink-0 w-1/3 px-2 flex flex-col items-center"
+              className="flex-shrink-0 relative rounded-xl overflow-hidden group h-60"
             >
               <img
                 src={photo.url}
                 alt={photo.caption || `Zdjęcie ${photo.id}`}
-                className="h-48 w-auto rounded shadow"
+                className="h-full w-auto object-contain rounded-xl shadow-md transition-transform duration-300 group-hover:scale-105"
               />
               {photo.caption && (
-                <div className="text-center mt-1 text-sm text-[#3E452A]">
+                <div className="absolute bottom-0 left-0 w-full bg-black/50 text-white text-sm text-center py-1 opacity-0 group-hover:opacity-100 transition">
                   {photo.caption}
                 </div>
               )}
@@ -53,15 +43,42 @@ const PhotosPlayer = ({ photos = [] }) => {
         )}
       </div>
 
+      {/* Left arrow */}
+      <button
+        onClick={handlePrev}
+        disabled={currentPage === 0}
+        aria-label="Poprzednie zdjęcie"
+        className="absolute top-1/2 -translate-y-1/2 left-4 bg-[#3E452A] text-[#D7D5BE] p-3 rounded-full shadow-lg disabled:opacity-40 hover:bg-[#2f351d] transition"
+      >
+        <ChevronLeft size={24} />
+      </button>
+
       {/* Right arrow */}
       <button
         onClick={handleNext}
         disabled={currentPage === totalPages - 1 || totalPages === 0}
         aria-label="Następne zdjęcie"
-        className="absolute right-0 z-10 h-full px-4 text-[#3E452A] bg-[#BCA97A] disabled:opacity-40 rounded-r-2xl flex items-center justify-center hover:bg-[#A99956] transition-colors"
+        className="absolute top-1/2 -translate-y-1/2 right-4 bg-[#3E452A] text-[#D7D5BE] p-3 rounded-full shadow-lg disabled:opacity-40 hover:bg-[#2f351d] transition"
       >
-        <ChevronRight size={28} />
+        <ChevronRight size={24} />
       </button>
+
+      {/* Pagination dots */}
+      {totalPages > 1 && (
+        <div className="flex justify-center gap-2 pb-4">
+          {Array.from({ length: totalPages }).map((_, idx) => (
+            <span
+              key={idx}
+              className={`h-2 w-2 rounded-full transition ${
+                idx === currentPage
+                  ? "bg-[#3E452A]"
+                  : "bg-gray-400 hover:bg-gray-600 cursor-pointer"
+              }`}
+              onClick={() => setCurrentPage(idx)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 };
